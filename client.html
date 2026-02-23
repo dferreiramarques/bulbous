@@ -164,7 +164,7 @@ input  { font: inherit; }
 /* Opponents strip */
 #opponents-area {
   display: flex; gap: 10px; padding: 10px 16px; flex-shrink: 0;
-  overflow-x: auto; border-bottom: 1px solid var(--border); background: var(--surface);
+  overflow-x: auto; overflow-y: visible; border-bottom: 1px solid var(--border); background: var(--surface);
   justify-content: center;
 }
 .opponent-panel {
@@ -213,40 +213,33 @@ input  { font: inherit; }
 /* Baelfungious card */
 .baelf-card {
   width: var(--baelf-w);
-  /* 9:15 ratio = baelf-w * 15/9 */
   height: calc(var(--baelf-w) * 15 / 9);
   border-radius: 7px; border: 2px solid var(--border);
-  display: flex; flex-direction: column;
   overflow: hidden;
   cursor: default; position: relative; user-select: none;
-  transition: border-color .2s, transform .15s, box-shadow .2s;
+  transition: border-color .2s, transform .15s, box-shadow .2s, z-index 0s;
 }
 .baelf-card.clickable { cursor: pointer; }
-.baelf-card.clickable:hover { transform: translateY(-6px); box-shadow: 0 10px 22px #00000080; z-index: 30; }
-.baelf-card.selected  { border-color: var(--accent) !important; box-shadow: 0 0 16px var(--accent); z-index: 30; transform: translateY(-4px); }
+.baelf-card.clickable:hover { transform: translateY(-6px); box-shadow: 0 10px 22px #00000080; z-index: 30; position: relative; }
+.baelf-card.selected  { border-color: var(--accent) !important; box-shadow: 0 0 16px var(--accent); z-index: 30; position: relative; transform: translateY(-4px); }
 .baelf-card.contested { border-color: var(--yellow) !important; }
 .baelf-card.complete  { opacity: .45; }
-/* Image fills card */
+/* Image fills card, full from top — no offset */
 .baelf-card img.baelf-img {
   position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; object-position: center 25%; border-radius: 5px;
+  object-fit: cover; object-position: center top; border-radius: 5px;
 }
-/* Overlay sits at the bottom, semi-transparent, holds sym + slots */
+/* Bottom overlay — fixed height 24px, holds slot dots + count */
 .baelf-overlay {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  background: rgba(0,0,0,.72); backdrop-filter: blur(2px);
-  display: flex; flex-direction: column; align-items: center;
-  gap: 2px; padding: 3px 4px 3px;
+  position: absolute; bottom: 0; left: 0; right: 0; height: 24px;
+  background: rgba(0,0,0,.82); backdrop-filter: blur(2px);
+  display: flex; flex-direction: row; align-items: center; justify-content: center;
+  gap: 4px; padding: 0 4px;
 }
 .baelf-sym    { display: none; }
-.baelf-top-mask {
-  position: absolute; top: 0; left: 0; right: 0; height: 30%;
-  background: rgba(0,0,0,1);
-  border-radius: 5px 5px 0 0; pointer-events: none;
-}
-.baelf-slots  { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; }
-.baelf-slot   { width: 9px; height: 9px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); }
-.baelf-count  { font-size: .55rem; opacity: .75; color: #fff; line-height: 1; }
+.baelf-slots  { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; align-items: center; }
+.baelf-slot   { width: 9px; height: 9px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); flex-shrink: 0; }
+.baelf-count  { font-size: .55rem; opacity: .75; color: #fff; line-height: 1; white-space: nowrap; }
 
 /* Charm card */
 .charm-card {
@@ -277,7 +270,7 @@ input  { font: inherit; }
   border-radius: 5px; border: 1px solid; white-space: nowrap;
 }
 #my-status     { font-size: .85rem; color: var(--muted); flex: 1; }
-#my-baelfs-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; justify-content: center; }
+#my-baelfs-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; justify-content: center; overflow-y: visible; }
 .my-baelf-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .my-baelf-tag  { font-size: .65rem; color: var(--muted); white-space: nowrap; }
 #action-bar    { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center; }
@@ -1032,9 +1025,7 @@ function mkBaelf(baelf, opts = {}) {
   img.src       = imgSrc;
   img.onerror   = () => img.remove();
   div.appendChild(img);
-  // Cover the symbol printed in the top-left of the card art
-  const topMask = ce('div', 'baelf-top-mask');
-  div.appendChild(topMask);
+
 
   // Semi-transparent overlay at bottom with symbol + slots
   const overlay = ce('div', 'baelf-overlay');

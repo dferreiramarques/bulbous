@@ -371,15 +371,12 @@ const MANIFEST = `{
   ]
 }`;
 
-// Caches the HTML shell so the app loads instantly and works offline
+// Service worker — caches only static assets (cards/icons), never the HTML
+// Cache name includes build timestamp so it busts automatically on each deploy
 const SW = `
-const CACHE = 'bulbous-v1';
-const SHELL = ['/'];
+const CACHE = 'bulbous-assets-1771878784711';
 
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)));
-  self.skipWaiting();
-});
+self.addEventListener('install', e => { self.skipWaiting(); });
 
 self.addEventListener('activate', e => {
   e.waitUntil(
@@ -391,25 +388,23 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // WebSocket requests: never intercept
-  if (e.request.url.startsWith('ws')) return;
-  // Navigation: serve shell from cache, falling back to network
-  if (e.request.mode === 'navigate') {
+  // Never intercept WebSockets or HTML navigation — always fresh from server
+  if (e.request.url.includes('ws://') || e.request.url.includes('wss://')) return;
+  if (e.request.mode === 'navigate') return;
+  // Cache card images and icons (static assets)
+  const url = new URL(e.request.url);
+  if (url.pathname.startsWith('/cards/') || url.pathname.startsWith('/icon')) {
     e.respondWith(
-      caches.match('/').then(r => r || fetch(e.request))
-    );
-    return;
-  }
-  // Assets: network first, cache as fallback
-  e.respondWith(
-    fetch(e.request)
-      .then(r => {
-        const clone = r.clone();
-        caches.open(CACHE).then(c => c.put(e.request, clone));
-        return r;
+      caches.match(e.request).then(cached => {
+        if (cached) return cached;
+        return fetch(e.request).then(r => {
+          const clone = r.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+          return r;
+        });
       })
-      .catch(() => caches.match(e.request))
-  );
+    );
+  }
 });
 `;
 

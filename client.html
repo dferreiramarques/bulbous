@@ -236,12 +236,12 @@ input  { font: inherit; }
   position: absolute; bottom: 0; left: 0; right: 0;
   background: rgba(0,0,0,.72); backdrop-filter: blur(2px);
   display: flex; flex-direction: column; align-items: center;
-  gap: 3px; padding: 5px 4px 4px;
+  gap: 2px; padding: 3px 4px 3px;
 }
-.baelf-sym    { font-size: 1.1rem; line-height: 1; }
+.baelf-sym    { display: none; }
 .baelf-slots  { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; }
-.baelf-slot   { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); }
-.baelf-count  { font-size: .6rem; opacity: .75; color: #fff; }
+.baelf-slot   { width: 9px; height: 9px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); }
+.baelf-count  { font-size: .55rem; opacity: .75; color: #fff; line-height: 1; }
 
 /* Charm card */
 .charm-card {
@@ -1030,7 +1030,6 @@ function mkBaelf(baelf, opts = {}) {
 
   // Semi-transparent overlay at bottom with symbol + slots
   const overlay = ce('div', 'baelf-overlay');
-  overlay.appendChild(ce('div', 'baelf-sym', SYM_ICON[baelf.symbol] || '?'));
 
   const slots = ce('div', 'baelf-slots');
   for (let s = 0; s < baelf.slots; s++) {

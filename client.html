@@ -229,7 +229,7 @@ input  { font: inherit; }
 /* Image fills card */
 .baelf-card img.baelf-img {
   position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; object-position: center top; border-radius: 5px;
+  object-fit: cover; object-position: center 15%; border-radius: 5px;
 }
 /* Overlay sits at the bottom, semi-transparent, holds sym + slots */
 .baelf-overlay {
@@ -239,6 +239,11 @@ input  { font: inherit; }
   gap: 2px; padding: 3px 4px 3px;
 }
 .baelf-sym    { display: none; }
+.baelf-top-mask {
+  position: absolute; top: 0; left: 0; right: 0; height: 26%;
+  background: linear-gradient(to bottom, rgba(0,0,0,.82) 40%, transparent 100%);
+  border-radius: 5px 5px 0 0; pointer-events: none;
+}
 .baelf-slots  { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; }
 .baelf-slot   { width: 9px; height: 9px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); }
 .baelf-count  { font-size: .55rem; opacity: .75; color: #fff; line-height: 1; }
@@ -1027,6 +1032,9 @@ function mkBaelf(baelf, opts = {}) {
   img.src       = imgSrc;
   img.onerror   = () => img.remove();
   div.appendChild(img);
+  // Cover the symbol printed in the top-left of the card art
+  const topMask = ce('div', 'baelf-top-mask');
+  div.appendChild(topMask);
 
   // Semi-transparent overlay at bottom with symbol + slots
   const overlay = ce('div', 'baelf-overlay');
@@ -1053,10 +1061,7 @@ function mkMiniBaelf(baelf, isActive) {
   const div = ce('div','mini-baelf' + (isActive?' active-slot':'') + (baelf.complete?' complete':''));
   div.style.borderColor = COLOR_HEX[baelf.color] || '#555';
   div.style.background  = COLOR_DIM[baelf.color] || '#222';
-  // Symbol
-  const sym = ce('div', null, SYM_ICON[baelf.symbol] || '?');
-  sym.style.cssText = 'font-size:.6rem;line-height:1';
-  div.appendChild(sym);
+
   // Slot dots — filled ones show the owner's colour
   const dots = ce('div','mini-slot-dots');
   for (let s = 0; s < baelf.slots; s++) {

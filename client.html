@@ -267,12 +267,12 @@ input  { font: inherit; }
   flex-shrink: 0; display: flex; flex-direction: column;
   gap: 8px; padding: 10px 16px; max-height: 52vh; overflow-y: auto;
 }
-#my-info-row   { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; }
+#my-info-row   { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; width: 100%; }
 #my-name-badge {
   font-size: .92rem; font-weight: 700; padding: 3px 11px;
   border-radius: 5px; border: 1px solid; white-space: nowrap;
 }
-#my-status     { font-size: .85rem; color: var(--muted); flex: 1; text-align: center; }
+#my-status     { font-size: .85rem; color: var(--muted); text-align: center; }
 #my-baelfs-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; justify-content: center; overflow-y: visible; }
 .my-baelf-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .my-baelf-tag  { font-size: .65rem; color: var(--muted); white-space: nowrap; }
@@ -1386,7 +1386,7 @@ function renderActionBar(st) {
       return;
     }
 
-    el('my-status').textContent = 'A tua vez';
+    el('my-status').textContent = 'A tua vez'; el('my-status').style.textAlign = 'center';
 
     if (_mode === '') {
       bar.append(

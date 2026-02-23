@@ -1,8 +1,9 @@
 {
-  "name": "bulbous",
+  "name": "Bulbous",
   "version": "1.0.0",
   "description": "Bulbous — jogo de cartas com bluff e estratégia",
   "main": "server.js",
+  "license": "CC-BY-4.0",
   "scripts": {
     "start": "node server.js"
   },

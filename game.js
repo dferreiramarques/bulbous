@@ -138,8 +138,17 @@ function refillDeck(g) {
 }
 
 function drawN(g, n) {
-  refillDeck(g);
-  return g.deck.splice(0, Math.min(n, g.deck.length));
+  const drawn = [];
+  let remaining = n;
+  while (remaining > 0) {
+    refillDeck(g);
+    if (g.deck.length === 0) break; // truly empty
+    const batch = g.deck.splice(0, Math.min(remaining, g.deck.length));
+    drawn.push(...batch);
+    remaining -= batch.length;
+    if (remaining > 0 && g.deck.length === 0 && g.discard.length === 0) break;
+  }
+  return drawn;
 }
 
 // All centre baelfungious: [{playerIdx, slotIdx, baelfIdx, baelf}]
@@ -741,12 +750,17 @@ function buildView(g, playerIdx) {
 function botChooseBaelf(g, playerIdx) {
   const p         = g.players[playerIdx];
   const activeSet = new Set(p.activeSlots.filter(s => s !== null));
-  // Find non-complete, non-active baelfs; prefer fewest slots (easier to complete)
   const available = p.baelfungious
     .map((b, i) => ({ b, i }))
-    .filter(({ b, i }) => !b.complete && !activeSet.has(i))
-    .sort((a, b) => a.b.slots - b.b.slots);
-  return available.length > 0 ? available[0].i : null;
+    .filter(({ b, i }) => !b.complete && !activeSet.has(i));
+  if (!available.length) return null;
+  // Randomize strategy: 40% prefer fewest slots, 30% prefer most slots, 30% random
+  const r = Math.random();
+  if (r < 0.40) available.sort((a, b) => a.b.slots - b.b.slots);      // aggressive (fast complete)
+  else if (r < 0.70) available.sort((a, b) => b.b.slots - a.b.slots); // defensive (big slots)
+  // else: random order (already random since JS sort stability with no comparator is impl-defined)
+  else return available[Math.floor(Math.random() * available.length)].i;
+  return available[0].i;
 }
 
 function botChooseTarget(g) {

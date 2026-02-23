@@ -28,14 +28,14 @@
   --blue-dim:  #0f2040;
   --green-dim: #0d2e24;
   --yellow-dim:#3a2a08;
-  --card-w:    70px;
-  --card-h:    98px;
-  --baelf-w:   76px;
-  --baelf-h:   132px;
-  --radius:    8px;
+  --card-w:    88px;
+  --card-h:    123px;
+  --baelf-w:   95px;
+  --baelf-h:   165px;
+  --radius:    10px;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 16px; }
 button { cursor: pointer; border: none; font: inherit; }
 input  { font: inherit; }
 ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -76,7 +76,7 @@ input  { font: inherit; }
 }
 .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 .btn-action {
-  padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: .85rem;
+  padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: .95rem;
   transition: opacity .15s, transform .1s; border: 1px solid transparent;
 }
 .btn-action:active { transform: scale(.97); }
@@ -108,25 +108,25 @@ input  { font: inherit; }
 ═══════════════════════════════════════════════════════ */
 #screen-lobby { background: var(--bg); }
 .lobby-header {
-  padding: 16px 20px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 12px;
+  padding: 18px 22px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 14px;
 }
-.lobby-header h2 { font-size: 1.1rem; flex: 1; color: var(--accent); }
-.lobby-header span { color: var(--muted); font-size: .85rem; }
-.lobby-list { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.lobby-header h2 { font-size: 1.25rem; flex: 1; color: var(--accent); }
+.lobby-header span { color: var(--muted); font-size: .92rem; }
+.lobby-list { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
 .table-row {
-  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
-  padding: 14px 18px; display: flex; align-items: center; gap: 12px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px 20px; display: flex; align-items: center; gap: 14px;
   transition: border-color .15s;
 }
 .table-row:hover { border-color: var(--accent); }
 .table-info { flex: 1; }
-.table-info strong { display: block; margin-bottom: 2px; }
-.table-info small  { color: var(--muted); font-size: .8rem; }
-.table-players { color: var(--muted); font-size: .85rem; min-width: 48px; text-align: right; }
+.table-info strong { display: block; margin-bottom: 3px; font-size: 1rem; }
+.table-info small  { color: var(--muted); font-size: .85rem; }
+.table-players { color: var(--muted); font-size: .9rem; min-width: 52px; text-align: right; }
 .table-btn {
-  padding: 8px 16px; border-radius: 6px; background: var(--accent); color: #0d0d1a;
-  font-weight: 600; font-size: .85rem; min-width: 74px;
+  padding: 10px 18px; border-radius: 8px; background: var(--accent); color: #0d0d1a;
+  font-weight: 600; font-size: .9rem; min-width: 80px;
 }
 .table-btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
 
@@ -153,53 +153,55 @@ input  { font: inherit; }
 #screen-game.active { display: flex; }
 
 #game-header {
-  padding: 6px 12px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
-  background: var(--surface);
+  padding: 10px 18px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 14px; flex-shrink: 0;
+  background: var(--surface); min-height: 52px;
 }
-.hdr-phase { flex: 1; font-size: .8rem; color: var(--accent); font-weight: 600; letter-spacing: .05em; }
-.hdr-info  { color: var(--muted); font-size: .75rem; }
-#btn-leave { padding: 4px 10px; font-size: .75rem; border-radius: 4px; background: transparent; border: 1px solid var(--border); color: var(--muted); }
+.hdr-phase { flex: 1; font-size: 1.1rem; color: var(--accent); font-weight: 700; letter-spacing: .03em; }
+.hdr-info  { color: var(--muted); font-size: .92rem; }
+#btn-leave { padding: 7px 16px; font-size: .88rem; border-radius: 6px; background: transparent; border: 1px solid var(--border); color: var(--muted); }
 
 /* Opponents strip */
 #opponents-area {
-  display: flex; gap: 8px; padding: 8px 12px; flex-shrink: 0;
+  display: flex; gap: 10px; padding: 10px 16px; flex-shrink: 0;
   overflow-x: auto; border-bottom: 1px solid var(--border); background: var(--surface);
+  justify-content: center;
 }
 .opponent-panel {
-  display: flex; flex-direction: column; gap: 3px; min-width: 108px;
-  background: var(--surface2); border-radius: 8px; padding: 6px 8px;
+  display: flex; flex-direction: column; gap: 4px; min-width: 155px;
+  background: var(--surface2); border-radius: 10px; padding: 9px 11px;
   border: 2px solid transparent; transition: border-color .2s; flex-shrink: 0;
 }
 .opponent-panel.governor { border-color: var(--yellow); }
 .opponent-panel.acting   { border-color: var(--accent); animation: pulse .8s ease infinite alternate; }
-@keyframes pulse { from { box-shadow: none; } to { box-shadow: 0 0 10px var(--accent); } }
-.opp-name { font-size: .75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.opp-meta { font-size: .68rem; color: var(--muted); }
-.opp-baelfs { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 3px; }
+@keyframes pulse { from { box-shadow: none; } to { box-shadow: 0 0 12px var(--accent); } }
+.opp-name    { font-size: .88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.opp-meta    { font-size: .78rem; color: var(--muted); }
+.opp-action  { font-size: .8rem; min-height: 1.1rem; font-weight: 600; }
+.opp-baelfs  { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
 
-/* Mini baelfungious */
+/* Mini baelfungious — sized to show bulb distribution clearly */
 .mini-baelf {
-  width: 22px; height: 38px; border-radius: 3px; border: 1px solid var(--border);
+  width: 36px; height: 60px; border-radius: 5px; border: 1px solid var(--border);
   display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-  padding: 2px; font-size: .5rem; overflow: hidden;
+  padding: 3px 2px; font-size: .65rem; overflow: hidden; position: relative;
 }
 .mini-baelf.active-slot { border-width: 2px; }
 .mini-baelf.complete    { opacity: .35; }
-.mini-slot-dots { display: flex; flex-wrap: wrap; gap: 1px; justify-content: center; }
-.mini-slot-dot  { width: 4px; height: 4px; border-radius: 50%; background: var(--border); }
-.mini-slot-dot.filled { background: rgba(255,255,255,.85); }
+.mini-slot-dots { display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; }
+.mini-slot-dot  { width: 8px; height: 8px; border-radius: 50%; border: 1px solid rgba(255,255,255,.15); background: transparent; }
+.mini-slot-dot.filled { border-color: transparent; filter: brightness(1.3) saturate(1.5); box-shadow: 0 0 3px currentColor; }
 
 /* Centre */
 #centre-area {
   flex: 1; display: flex; align-items: center; justify-content: center;
-  gap: 14px; padding: 10px 12px; overflow: hidden; flex-wrap: wrap;
+  gap: 18px; padding: 12px 16px; overflow: hidden; flex-wrap: wrap;
 }
 .active-baelf-slot {
-  display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 5px; position: relative;
 }
 .owner-label {
-  font-size: .68rem; color: var(--muted); max-width: var(--baelf-w);
+  font-size: .78rem; color: var(--muted); max-width: var(--baelf-w);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;
 }
 .gov-marker {
@@ -210,21 +212,36 @@ input  { font: inherit; }
 
 /* Baelfungious card */
 .baelf-card {
-  width: var(--baelf-w); height: var(--baelf-h); border-radius: 6px;
-  border: 2px solid var(--border); display: flex; flex-direction: column;
-  align-items: center; justify-content: space-between; padding: 6px 4px;
+  width: var(--baelf-w);
+  /* 9:15 ratio = baelf-w * 15/9 */
+  height: calc(var(--baelf-w) * 15 / 9);
+  border-radius: 7px; border: 2px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
   cursor: default; position: relative; user-select: none;
   transition: border-color .2s, transform .15s, box-shadow .2s;
 }
 .baelf-card.clickable { cursor: pointer; }
-.baelf-card.clickable:hover { transform: translateY(-5px); box-shadow: 0 8px 20px #00000070; }
-.baelf-card.selected  { border-color: var(--accent) !important; box-shadow: 0 0 14px var(--accent); }
+.baelf-card.clickable:hover { transform: translateY(-6px); box-shadow: 0 10px 22px #00000080; z-index: 30; }
+.baelf-card.selected  { border-color: var(--accent) !important; box-shadow: 0 0 16px var(--accent); z-index: 30; transform: translateY(-4px); }
 .baelf-card.contested { border-color: var(--yellow) !important; }
 .baelf-card.complete  { opacity: .45; }
-.baelf-sym    { font-size: 1.2rem; }
+/* Image fills card */
+.baelf-card img.baelf-img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center top; border-radius: 5px;
+}
+/* Overlay sits at the bottom, semi-transparent, holds sym + slots */
+.baelf-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(0,0,0,.72); backdrop-filter: blur(2px);
+  display: flex; flex-direction: column; align-items: center;
+  gap: 3px; padding: 5px 4px 4px;
+}
+.baelf-sym    { font-size: 1.1rem; line-height: 1; }
 .baelf-slots  { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; }
-.baelf-slot   { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(255,255,255,.2); }
-.baelf-count  { font-size: .58rem; opacity: .55; }
+.baelf-slot   { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); }
+.baelf-count  { font-size: .6rem; opacity: .75; color: #fff; }
 
 /* Charm card */
 .charm-card {
@@ -236,33 +253,36 @@ input  { font: inherit; }
   transition: border-color .15s, transform .15s, box-shadow .15s;
 }
 .charm-card.clickable { cursor: pointer; }
-.charm-card.clickable:hover { transform: translateY(-7px); box-shadow: 0 10px 18px #00000070; }
-.charm-card.selected { border-color: var(--accent) !important; box-shadow: 0 0 10px var(--accent); transform: translateY(-9px); }
+.charm-card.clickable:hover { transform: translateY(-7px); box-shadow: 0 10px 18px #00000070; z-index: 20; }
+.charm-card.selected { border-color: var(--accent) !important; box-shadow: 0 0 10px var(--accent); transform: translateY(-9px); z-index: 20; }
 .charm-card.invalid  { opacity: .3; cursor: not-allowed; }
-.charm-top   { font-size: 1rem; font-weight: 800; line-height: 1; }
-.charm-mid   { font-size: 1.5rem; font-weight: 900; }
-.charm-bot   { font-size: .58rem; letter-spacing: .04em; opacity: .75; }
+.charm-top   { font-size: 1.15rem; font-weight: 800; line-height: 1; }
+.charm-mid   { font-size: 1.8rem; font-weight: 900; }
+.charm-bot   { font-size: .7rem; letter-spacing: .04em; opacity: .75; }
 
 /* My area */
 #my-area {
   border-top: 1px solid var(--border); background: var(--surface);
   flex-shrink: 0; display: flex; flex-direction: column;
-  gap: 6px; padding: 8px 12px; max-height: 50vh; overflow-y: auto;
+  gap: 8px; padding: 10px 16px; max-height: 52vh; overflow-y: auto;
 }
-#my-info-row   { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+#my-info-row   { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 #my-name-badge {
-  font-size: .8rem; font-weight: 700; padding: 2px 9px;
-  border-radius: 4px; border: 1px solid; white-space: nowrap;
+  font-size: .92rem; font-weight: 700; padding: 3px 11px;
+  border-radius: 5px; border: 1px solid; white-space: nowrap;
 }
-#my-status     { font-size: .75rem; color: var(--muted); flex: 1; }
-#my-baelfs-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+#my-status     { font-size: .85rem; color: var(--muted); flex: 1; }
+#my-baelfs-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; justify-content: center; }
 .my-baelf-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.my-baelf-tag  { font-size: .58rem; color: var(--muted); white-space: nowrap; }
-#action-bar    { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-#hand-label    { font-size: .7rem; color: var(--muted); }
+.my-baelf-tag  { font-size: .65rem; color: var(--muted); white-space: nowrap; }
+#action-bar    { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center; }
+#hand-label    { font-size: .78rem; color: var(--muted); text-align: center; }
 #my-hand-row   {
-  display: flex; gap: 5px; overflow-x: auto; padding-bottom: 4px;
-  min-height: calc(var(--card-h) + 10px);
+  display: flex; gap: 7px; overflow-x: auto; padding-bottom: 4px;
+  padding-top: 16px;
+  min-height: calc(var(--card-h) + 26px);
+  position: relative; z-index: 1;
+  justify-content: center;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -316,11 +336,229 @@ input  { font: inherit; }
 .score-table td:first-child, .score-table th:first-child { text-align: left; }
 .score-table .winner-row td { color: var(--yellow); font-weight: 700; }
 .go-actions { display: flex; gap: 10px; }
+
+/* ═══════════════════════════════════════════════════════
+   RULES MODAL
+═══════════════════════════════════════════════════════ */
+#rules-overlay {
+  display: none; position: fixed; inset: 0; z-index: 700;
+  background: rgba(0,0,0,.82); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+}
+#rules-overlay.show { display: flex; }
+.rules-box {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 14px;
+  padding: 24px 28px; max-width: 92vw; width: 580px; max-height: 88vh;
+  display: flex; flex-direction: column; gap: 0; overflow: hidden;
+}
+.rules-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-shrink: 0;
+}
+.rules-header h2 { flex: 1; color: var(--accent); font-size: 1.2rem; }
+.btn-close-rules {
+  padding: 4px 10px; border-radius: 6px; background: transparent;
+  border: 1px solid var(--border); color: var(--muted); font-size: .85rem; cursor: pointer;
+}
+.rules-tabs {
+  display: flex; gap: 4px; margin-bottom: 12px; flex-shrink: 0; flex-wrap: wrap;
+}
+.rules-tab {
+  padding: 5px 12px; border-radius: 6px; background: transparent;
+  border: 1px solid var(--border); color: var(--muted); font-size: .8rem; cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.rules-tab.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; }
+.rules-content { flex: 1; overflow-y: auto; font-size: .83rem; line-height: 1.6; color: var(--text); }
+.rules-section { display: none; }
+.rules-section.active { display: block; }
+.rules-section h3 { color: var(--accent); font-size: .95rem; margin: 14px 0 6px; }
+.rules-section h3:first-child { margin-top: 0; }
+.rules-section p  { margin-bottom: 8px; color: #c0c0d8; }
+.rules-section ul { padding-left: 18px; margin-bottom: 8px; }
+.rules-section li { margin-bottom: 4px; color: #c0c0d8; }
+.rules-section .pill {
+  display: inline-block; padding: 1px 7px; border-radius: 10px;
+  font-size: .75rem; font-weight: 600; margin: 1px;
+}
+.pill-red    { background: var(--red-dim);    color: var(--red);    border: 1px solid var(--red); }
+.pill-blue   { background: var(--blue-dim);   color: var(--blue);   border: 1px solid var(--blue); }
+.pill-green  { background: var(--green-dim);  color: var(--green);  border: 1px solid var(--green); }
+.pill-yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid var(--yellow); }
+.rule-box {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 14px; margin: 8px 0;
+}
+.rule-box strong { color: var(--accent); }
+
+/* Refill banner */
+#refill-banner {
+  display: none; position: fixed; top: 50px; left: 50%; transform: translateX(-50%);
+  background: var(--green-dim); border: 1px solid var(--green); color: var(--green);
+  padding: 8px 20px; border-radius: 20px; font-size: .82rem; font-weight: 600;
+  z-index: 400; animation: fadeInOut 2.8s forwards;
+}
+@keyframes fadeInOut {
+  0%   { opacity: 0; top: 40px; }
+  15%  { opacity: 1; top: 50px; }
+  75%  { opacity: 1; top: 50px; }
+  100% { opacity: 0; top: 40px; }
+}
 </style>
 </head>
 <body>
 
 <div id="toast"></div>
+<div id="refill-banner">🃏 Mão reabastecida!</div>
+
+<!-- ═══ RULES MODAL ═══════════════════════════════════════════ -->
+<div id="rules-overlay">
+  <div class="rules-box">
+    <div class="rules-header">
+      <h2>📖 Como Jogar — Bulbous</h2>
+      <button class="btn-close-rules" id="btn-close-rules">✕ Fechar</button>
+    </div>
+    <div class="rules-tabs">
+      <button class="rules-tab active" data-tab="objetivo">Objetivo</button>
+      <button class="rules-tab" data-tab="setup">Setup</button>
+      <button class="rules-tab" data-tab="ronda">Ronda</button>
+      <button class="rules-tab" data-tab="acoes">Ações</button>
+      <button class="rules-tab" data-tab="cartas">Cartas</button>
+      <button class="rules-tab" data-tab="pontos">Pontuação</button>
+      <button class="rules-tab" data-tab="2p">Modo 2J</button>
+    </div>
+    <div class="rules-content">
+
+      <div class="rules-section active" id="tab-objetivo">
+        <h3>O que é o Bulbous?</h3>
+        <p>Jogo de <strong>bluff, sorte e estratégia</strong> para 2 ou 4 jogadores. Os jogadores apostam cartas para ganhar vazas e colocar <strong>bolbos</strong> nas suas criaturas mágicas — os <strong>Baelfungious</strong>.</p>
+        <h3>Como ganhar</h3>
+        <p>No fim do jogo, conta pontos por:</p>
+        <ul>
+          <li>🔵 <strong>1 ponto</strong> por cada bolbo colocado (em qualquer Baelfungious)</li>
+          <li>👑 <strong>+3 pontos</strong> de maioria numa Baelfungious <em>completa</em> (ou +1 em caso de empate)</li>
+          <li>🌈 <strong>+5 pontos</strong> por ter pelo menos 1 Baelfungious completa de cada cor</li>
+          <li>⭕▲ <strong>+5 pontos</strong> por ter pelo menos 1 Baelfungious completa de cada símbolo</li>
+        </ul>
+        <div class="rule-box">
+          <strong>Baelfungious completa</strong> = todos os slots preenchidos com bolbos.<br>
+          Apenas as completas contam para maioria e coleção!
+        </div>
+      </div>
+
+      <div class="rules-section" id="tab-setup">
+        <h3>Distribuição inicial (4 jogadores)</h3>
+        <ul>
+          <li>Cada jogador recebe uma cor aleatória: <span class="pill pill-red">Vermelho</span> <span class="pill pill-blue">Azul</span> <span class="pill pill-green">Verde</span> <span class="pill pill-yellow">Amarelo</span></li>
+          <li>Cada jogador recebe as <strong>4 Baelfungious da sua cor</strong> (1, 2, 3 e 4 slots)</li>
+          <li>Cada jogador recebe <strong>7 cartas de Charme</strong> na mão</li>
+          <li>O resto forma o baralho de compra</li>
+        </ul>
+        <h3>Início</h3>
+        <p>Antes da primeira ronda, <strong>cada jogador escolhe 1 Baelfungious</strong> da sua reserva para colocar no centro — essa fica ativa para ser disputada.</p>
+        <p>O <strong>Governante da Ronda</strong> é escolhido aleatoriamente. A cada ronda passa para o jogador à esquerda.</p>
+      </div>
+
+      <div class="rules-section" id="tab-ronda">
+        <h3>Estrutura de uma ronda</h3>
+        <p>Cada ronda tem <strong>4 vazas</strong> (uma para cada Baelfungious ativa). O Governante escolhe qual Baelfungious contestar em cada vaza.</p>
+        <div class="rule-box">
+          <strong>Ordem de jogo:</strong> começa sempre no Governante, sentido horário, em todas as 4 vazas.
+        </div>
+        <h3>Sequência de uma vaza</h3>
+        <ul>
+          <li>1. 👑 Governante escolhe o alvo (clica na Baelfungious)</li>
+          <li>2. Cada jogador escolhe uma ação (Apostar / Trocar / Passar)</li>
+          <li>3. Revelação simultânea das apostas</li>
+          <li>4. Maior total ganha → coloca 1 bolbo na Baelfungious</li>
+          <li>5. Próxima vaza</li>
+        </ul>
+        <h3>Fim da ronda</h3>
+        <ul>
+          <li>Baelfungious completas são removidas do centro</li>
+          <li>Os proprietários escolhem novas Baelfungious para substituir</li>
+          <li>Se pelo menos 1 completou: <strong>todos reabastecem a mão</strong> até ao limite</li>
+          <li>Se nenhuma completou: <strong>ninguém compra</strong> — gestão de mão crucial!</li>
+        </ul>
+        <h3>Fim do jogo</h3>
+        <p>Quando um jogador coloca o seu <strong>último Baelfungious</strong> como ativo, joga-se essa ronda até ao fim e contam-se pontos.</p>
+      </div>
+
+      <div class="rules-section" id="tab-acoes">
+        <h3>🃏 Apostar</h3>
+        <p>Joga 1 ou mais cartas viradas para baixo. As cartas devem obedecer à <strong>Regra de Correspondência</strong>:</p>
+        <div class="rule-box">
+          A carta deve ter a <strong>mesma cor</strong> OU o <strong>mesmo símbolo</strong> que a Baelfungious ativa.<br><br>
+          Exemplo: Baelfungious Vermelho▲ → aceita cartas Vermelhas ou o Joker▲.
+        </div>
+        <h3>🔄 Trocar</h3>
+        <p>Descarta 1 ou 2 cartas (viradas para cima) e compra o mesmo número do baralho. <strong>Simétrico: descarta 1 = compra 1.</strong></p>
+        <h3>⏭ Passar</h3>
+        <p>Não participas nesta vaza. Compras 1 carta do baralho de compra.</p>
+        <div class="rule-box">
+          <strong>Atenção:</strong> se ao passares a tua mão ultrapassar o limite, tens de descartar o excesso antes do próximo jogador agir.
+        </div>
+        <h3>⚔️ Desempate</h3>
+        <p>Em caso de empate, cada jogador empatado pode <em>opcionalmente</em> jogar +1 carta da mesma cor da Baelfungious. Tens 20 segundos para decidir.</p>
+        <ul>
+          <li>Quem jogar e tiver maior total ganha</li>
+          <li>Se nenhum jogar → empate persiste → nada acontece</li>
+          <li>Se ambos jogarem e empatarem de novo → nada acontece</li>
+        </ul>
+      </div>
+
+      <div class="rules-section" id="tab-cartas">
+        <h3>Cartas Numéricas (28)</h3>
+        <p>Valores 3–9 em cada cor. Sem símbolo — só correspondem por cor.</p>
+        <h3>Cartas Duplo ×2 (4)</h3>
+        <p>Uma de cada cor. <strong>Multiplica o total da aposta por 2</strong>, mas apenas quando jogada numa Baelfungious da mesma cor. Não tem valor numérico próprio.</p>
+        <div class="rule-box">
+          Exemplo: 7 + 6 + Duplo Vermelho numa Baelfungious Vermelha = (7+6) × 2 = <strong>26</strong>
+        </div>
+        <h3>Jokers (2)</h3>
+        <p>Apenas 2 em todo o jogo — um Círculo ⭕, um Triângulo ▲.</p>
+        <ul>
+          <li>O Joker correto <strong>ganha automaticamente</strong> a vaza, independentemente dos outros totais</li>
+          <li>Joker⭕ ganha em Baelfungious Círculo; Joker▲ ganha em Baelfungious Triângulo</li>
+          <li>Não podes jogar um Joker numa Baelfungious com símbolo errado</li>
+        </ul>
+        <h3>Limite de mão</h3>
+        <p>4 jogadores: <strong>7 cartas</strong> · 2 jogadores: <strong>9 cartas</strong></p>
+      </div>
+
+      <div class="rules-section" id="tab-pontos">
+        <h3>Contagem final</h3>
+        <ul>
+          <li><strong>Bolbos:</strong> 1 ponto por bolbo (completo ou incompleto)</li>
+          <li><strong>Maioria numa completa:</strong> +3 pts (ou +1 pts cada em empate)</li>
+          <li><strong>Coleção de cores:</strong> +5 pts por ter ≥1 completa de cada uma das 4 cores</li>
+          <li><strong>Coleção de símbolos:</strong> +5 pts por ter ≥1 completa ⭕ e ≥1 completa ▲</li>
+        </ul>
+        <div class="rule-box">
+          <strong>Só Baelfungious completas</strong> contam para maioria e bónus de coleção.<br>
+          Bolbos em incompletas valem apenas 1 pt cada.
+        </div>
+        <h3>Vitória</h3>
+        <p>Jogador com mais pontos ganha. Em caso de empate, vitória partilhada.</p>
+      </div>
+
+      <div class="rules-section" id="tab-2p">
+        <h3>Modo 2 Jogadores</h3>
+        <p>Cada jogador escolhe um <strong>símbolo</strong> (⭕ ou ▲) e controla as Baelfungious das 2 cores correspondentes:</p>
+        <ul>
+          <li>⭕ Círculo → <span class="pill pill-blue">Azul</span> + <span class="pill pill-green">Verde</span> (8 Baelfungious, 1–4 slots × 2 cores)</li>
+          <li>▲ Triângulo → <span class="pill pill-red">Vermelho</span> + <span class="pill pill-yellow">Amarelo</span> (8 Baelfungious, 1–4 slots × 2 cores)</li>
+        </ul>
+        <ul>
+          <li><strong>4 Baelfungious ativas</strong> no centro (2 por jogador)</li>
+          <li><strong>Limite de mão: 9 cartas</strong></li>
+          <li>Governante alterna a cada ronda (jogador 1 → jogador 2 → ...)</li>
+          <li>Fim do jogo quando um jogador coloca a sua 8ª e última Baelfungious</li>
+        </ul>
+      </div>
+
+    </div><!-- rules-content -->
+  </div>
+</div>
 
 <!-- ═══ NAME ════════════════════════════════════════════════ -->
 <div id="screen-name" class="screen">
@@ -339,6 +577,7 @@ input  { font: inherit; }
   <div class="lobby-header">
     <h2>BULBOUS</h2>
     <span id="lby-name"></span>
+    <button class="btn-ghost" id="btn-rules-lobby">📖 Como Jogar?</button>
     <button class="btn-ghost" id="btn-change-name">Mudar nome</button>
   </div>
   <div class="lobby-list" id="lobby-list">
@@ -365,6 +604,7 @@ input  { font: inherit; }
     <span class="hdr-phase" id="hdr-phase">—</span>
     <span class="hdr-info"  id="hdr-round"></span>
     <span class="hdr-info"  id="hdr-deck" style="margin-left:8px"></span>
+    <button class="btn-ghost" id="btn-rules-game" style="padding:3px 8px;font-size:.72rem">📖 Regras</button>
     <button id="btn-leave">Sair</button>
   </div>
   <div id="opponents-area"></div>
@@ -446,6 +686,7 @@ let mySolo      = false;
 let _lobbies    = [];
 let _gs         = null;   // current game state (buildView output)
 let _prevPhase  = '';
+let _prevHandSize = 0;
 let _mode       = '';     // ''|'bet'|'swap'
 let _selCards   = [];     // card ids selected
 let _selBaelf   = null;   // {baelfIdx?} or {playerIdx,slotIdx}
@@ -634,25 +875,48 @@ function mkCharm(c, opts = {}) {
   div.style.borderColor = COLOR_HEX[c.color] || '#555';
   div.style.background  = COLOR_DIM[c.color] || '#222';
 
+  // Try image first
+  const imgSrc = charmImgSrc(c);
+  if (imgSrc) {
+    const img = document.createElement('img');
+    img.src   = imgSrc;
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:3px;position:absolute;inset:0';
+    img.onerror = () => { img.remove(); appendCharmFallback(div, c); };
+    img.onload  = () => { div.style.background = 'transparent'; };
+    div.style.position = 'relative';
+    div.appendChild(img);
+    return div;
+  }
+
+  appendCharmFallback(div, c);
+  return div;
+}
+
+function charmImgSrc(c) {
+  if (c.type === 'joker')  return `/cards/card_joker_${c.symbol}.png`;
+  if (c.type === 'double') return `/cards/card_${c.color}_x2.png`;
+  if (c.type === 'numeric') return `/cards/card_${c.color}_${c.value}.png`;
+  return null;
+}
+
+function appendCharmFallback(div, c) {
   let top, mid, bot;
   if (c.type === 'joker') {
     top = SYM_ICON[c.symbol] || '?'; mid = '🃏'; bot = 'JOKER';
   } else if (c.type === 'double') {
-    top = '×2'; mid = '×2'; bot = (c.color || '').toUpperCase();
+    top = '×2'; bot = (c.color || '').toUpperCase();
     const midEl = ce('div','charm-mid');
     midEl.style.color = COLOR_HEX[c.color] || '#fff';
     midEl.textContent = '×2';
     div.append(ce('div','charm-top', top), midEl, ce('div','charm-bot', bot));
-    return div;
+    return;
   } else {
     top = c.value; mid = String(c.value); bot = (c.color || '').toUpperCase();
   }
-
   const midEl = ce('div','charm-mid');
   midEl.style.color = COLOR_HEX[c.color] || '#fff';
   midEl.textContent = mid;
   div.append(ce('div','charm-top', String(top)), midEl, ce('div','charm-bot', bot));
-  return div;
 }
 
 function mkBaelf(baelf, opts = {}) {
@@ -665,20 +929,33 @@ function mkBaelf(baelf, opts = {}) {
   div.style.borderColor = COLOR_HEX[baelf.color] || '#555';
   div.style.background  = COLOR_DIM[baelf.color] || '#222';
 
-  div.appendChild(ce('div','baelf-sym', SYM_ICON[baelf.symbol] || '?'));
+  // Full-card image (9:15 ratio, covers entire card)
+  const imgSrc = `/cards/baelf_${baelf.color}_${baelf.slots}.png`;
+  const img    = document.createElement('img');
+  img.className = 'baelf-img';
+  img.src       = imgSrc;
+  img.onerror   = () => img.remove();
+  div.appendChild(img);
 
-  const slots = ce('div','baelf-slots');
+  // Semi-transparent overlay at bottom with symbol + slots
+  const overlay = ce('div', 'baelf-overlay');
+  overlay.appendChild(ce('div', 'baelf-sym', SYM_ICON[baelf.symbol] || '?'));
+
+  const slots = ce('div', 'baelf-slots');
   for (let s = 0; s < baelf.slots; s++) {
-    const dot = ce('div','baelf-slot');
+    const dot = ce('div', 'baelf-slot');
     if (s < baelf.bulbs.length) {
       const ownerColor = _gs?.players[baelf.bulbs[s]]?.color;
-      dot.style.background = COLOR_HEX[ownerColor] || 'rgba(255,255,255,.6)';
+      const hex = COLOR_HEX[ownerColor] || 'rgba(255,255,255,.6)';
+      dot.style.background = hex;
+      dot.style.boxShadow  = `0 0 4px ${hex}`;
       dot.title = _gs?.players[baelf.bulbs[s]]?.name || '';
     }
     slots.appendChild(dot);
   }
-  div.appendChild(slots);
-  div.appendChild(ce('div','baelf-count', `${baelf.bulbs.length}/${baelf.slots}`));
+  overlay.appendChild(slots);
+  overlay.appendChild(ce('div', 'baelf-count', `${baelf.bulbs.length}/${baelf.slots}`));
+  div.appendChild(overlay);
   return div;
 }
 
@@ -686,10 +963,20 @@ function mkMiniBaelf(baelf, isActive) {
   const div = ce('div','mini-baelf' + (isActive?' active-slot':'') + (baelf.complete?' complete':''));
   div.style.borderColor = COLOR_HEX[baelf.color] || '#555';
   div.style.background  = COLOR_DIM[baelf.color] || '#222';
-  div.appendChild(ce('div', null, SYM_ICON[baelf.symbol] || '?'));
+  // Symbol
+  const sym = ce('div', null, SYM_ICON[baelf.symbol] || '?');
+  sym.style.cssText = 'font-size:.6rem;line-height:1';
+  div.appendChild(sym);
+  // Slot dots — filled ones show the owner's colour
   const dots = ce('div','mini-slot-dots');
   for (let s = 0; s < baelf.slots; s++) {
-    dots.appendChild(ce('div','mini-slot-dot' + (s < baelf.bulbs.length ? ' filled' : '')));
+    const d = ce('div','mini-slot-dot' + (s < baelf.bulbs.length ? ' filled' : ''));
+    if (s < baelf.bulbs.length) {
+      const ownerColor = _gs?.players[baelf.bulbs[s]]?.color;
+      d.style.background = COLOR_HEX[ownerColor] || 'rgba(255,255,255,.7)';
+      d.title = _gs?.players[baelf.bulbs[s]]?.name || '';
+    }
+    dots.appendChild(d);
   }
   div.appendChild(dots);
   return div;
@@ -703,19 +990,47 @@ function renderGame(st) {
   showScreen('screen-game');
   const me = st.players[st.myIdx];
 
+  // My badge
+  const badge = el('my-name-badge');
+  badge.textContent       = me.name;
+  badge.style.color       = COLOR_HEX[me.color] || '#aaa';
+  badge.style.borderColor = COLOR_HEX[me.color] || '#aaa';
+  badge.style.background  = COLOR_DIM[me.color] || '#222';
+
   if (st.phase !== _prevPhase) {
     _mode = ''; _selCards = []; _selBaelf = null;
+    if (st.phase === 'TIE_BREAK') { _tbCard = null; clearInterval(_tieInt); _tieInt = null; }
     _prevPhase = st.phase;
   }
 
   // Header
   const phaseLabels = {
-    CHOOSE_BAELFUNGIOUS:'Escolher Baelfungious', CHOOSE_TARGET:'Escolher Alvo',
-    PLAYER_ACTIONS:'Ações dos Jogadores', TIE_BREAK:'Desempate', GAME_OVER:'Fim de Jogo',
+    CHOOSE_BAELFUNGIOUS: 'Escolher Baelfungious',
+    CHOOSE_TARGET:       'Escolher Alvo',
+    PLAYER_ACTIONS:      'BULBOUS',
+    TIE_BREAK:           '⚔️ Desempate',
+    GAME_OVER:           'Fim de Jogo',
   };
   el('hdr-phase').textContent = phaseLabels[st.phase] || st.phase;
   el('hdr-round').textContent = `Ronda ${st.roundNum}`;
-  el('hdr-deck').textContent  = `🂠${st.deckSize} 🗑️${st.discardSize}`;
+
+  // Deck info: warn when low, show Reshuffle when empty
+  const deckNote = st.deckSize === 0
+    ? '🔀 Reshuffle!'
+    : st.deckSize <= 4
+      ? `⚠️ 🂠${st.deckSize}`
+      : `🂠${st.deckSize}`;
+  el('hdr-deck').textContent = `${deckNote}  🗑️${st.discardSize}`;
+  el('hdr-deck').style.color = st.deckSize <= 4 ? 'var(--yellow)' : 'var(--muted)';
+
+  // Detect hand refill (hand grew compared to previous state)
+  if (_gs && _prevHandSize !== undefined) {
+    const me = st.players[st.myIdx];
+    if (me.hand && me.hand.length > _prevHandSize && _prevHandSize > 0) {
+      showRefillBanner(me.hand.length - _prevHandSize);
+    }
+  }
+  _prevHandSize = st.myHand?.length ?? 0;
 
   renderOpponents(st);
   renderCentre(st);
@@ -726,6 +1041,53 @@ function renderGame(st) {
 }
 
 // ── Opponents ─────────────────────────────────────────────────
+// Returns action text + colour for one player index given current state
+function oppActionInfo(st, i) {
+  const p   = st.players[i];
+  const lr  = st.lastTrickResult;
+
+  // ── After a trick resolved: show totals + winner ─────────────
+  if (lr && st.phase === 'PLAYER_ACTIONS') {
+    const at  = st.trick?.actionTypes?.[i];
+    const sc  = lr.scores?.[i];
+    const isW = lr.winner === i || lr.tieWinner === i;
+    const isTied = lr.tiedPlayers?.includes(i);
+    if (sc !== undefined) {
+      const total = sc.total === Infinity ? '∞' : sc.total;
+      if (at === 'pass') return { text: '⏭ Passou', color: 'var(--muted)' };
+      if (at === 'swap') return { text: '🔄 Trocou', color: '#7ab8ff' };
+      const trophy = isW ? ' 🏆' : isTied ? ' ⚔️' : '';
+      return { text: `${total}${trophy}`, color: isW ? 'var(--yellow)' : COLOR_HEX[p.color] || '#aaa' };
+    }
+  }
+
+  // ── During PLAYER_ACTIONS ─────────────────────────────────────
+  if (st.trick && (st.phase === 'PLAYER_ACTIONS' || st.trick?.revealed)) {
+    const at   = st.trick.actionTypes[i];
+    const bets = st.trick.bets?.[i];
+    const isAct = st.phase === 'PLAYER_ACTIONS' &&
+                  st.trick.actionOrder[st.trick.currentActorIdx] === i &&
+                  at === null;
+    if (at === 'bet' && bets) {
+      const n = bets.length;
+      return { text: `🃏 ${n} carta${n !== 1 ? 's' : ''}`, color: COLOR_HEX[p.color] || '#aaa' };
+    }
+    if (at === 'swap') return { text: '🔄 Trocou', color: '#7ab8ff' };
+    if (at === 'pass') return { text: '⏭ Passou',  color: 'var(--muted)' };
+    if (isAct)         return { text: '⏳ A pensar…', color: 'var(--accent)' };
+    if (at === null)   return { text: '— aguarda —', color: 'var(--muted)' };
+  }
+
+  // ── Tiebreak ─────────────────────────────────────────────────
+  if (st.phase === 'TIE_BREAK' && st.trick?.tiedPlayers.includes(i)) {
+    return st.trick.tieBreakSubmitted[i]
+      ? { text: '✓ Decidiu', color: 'var(--green)' }
+      : { text: '⚔️ A decidir…', color: 'var(--yellow)' };
+  }
+
+  return { text: '', color: 'var(--muted)' };
+}
+
 function renderOpponents(st) {
   const area = el('opponents-area');
   area.innerHTML = '';
@@ -738,25 +1100,26 @@ function renderOpponents(st) {
                   st.trick.actionTypes[i] === null;
 
     const panel = ce('div','opponent-panel' + (isGov?' governor':'') + (isAct?' acting':''));
+
     const nameEl = ce('div','opp-name', p.name + (isGov?' 👑':'') + (p.isBot?' 🤖':''));
     nameEl.style.color = COLOR_HEX[p.color] || '#aaa';
 
-    let actTxt = '';
-    if (st.trick && st.phase === 'PLAYER_ACTIONS') {
-      const at = st.trick.actionTypes[i];
-      if (at === 'bet') actTxt = ' · 🃏';
-      else if (at === 'swap') actTxt = ' · 🔄';
-      else if (at === 'pass') actTxt = ' · ⏭';
-      else if (isAct) actTxt = ' · ⏳';
-    }
-    const meta = ce('div','opp-meta', `🂠 ${p.handSize}${actTxt}`);
+    const meta = ce('div','opp-meta', `🂠 ${p.handSize} carta${p.handSize !== 1 ? 's' : ''}`);
 
-    const bfs = ce('div','opp-baelfs');
+    const { text, color } = oppActionInfo(st, i);
+    const actionEl = ce('div','opp-action', text);
+    actionEl.style.color = color;
+    // Make winning score big & bright
+    if (st.lastTrickResult && (st.lastTrickResult.winner === i || st.lastTrickResult.tieWinner === i)) {
+      actionEl.style.fontSize = '1.05rem';
+    }
+
+    const bfs  = ce('div','opp-baelfs');
     const aset = new Set(p.activeSlots.filter(s => s !== null));
     for (let bi = 0; bi < p.baelfungious.length; bi++)
       bfs.appendChild(mkMiniBaelf(p.baelfungious[bi], aset.has(bi)));
 
-    panel.append(nameEl, meta, bfs);
+    panel.append(nameEl, meta, actionEl, bfs);
     area.appendChild(panel);
   }
 }
@@ -907,8 +1270,22 @@ function renderActionBar(st) {
 
     // Already acted?
     if (t.actionTypes[st.myIdx] !== null) {
-      const lbl = { bet:'Apostaste 🃏', swap:'Trocaste 🔄', pass:'Passaste ⏭' };
-      el('my-status').textContent = (lbl[t.actionTypes[st.myIdx]] || 'Feito') + ' — aguarda os outros';
+      const lr = st.lastTrickResult;
+      const myAt = t.actionTypes[st.myIdx];
+      // After reveal: show score + trophy
+      if (lr && lr.scores?.[st.myIdx] !== undefined && myAt === 'bet') {
+        const sc = lr.scores[st.myIdx];
+        const total = sc.total === Infinity ? '∞' : sc.total;
+        const isW   = lr.winner === st.myIdx || lr.tieWinner === st.myIdx;
+        const isTied = lr.tiedPlayers?.includes(st.myIdx);
+        const emoji  = isW ? ' 🏆 Ganhaste!' : isTied ? ' ⚔️ Empate' : '';
+        el('my-status').style.color = isW ? 'var(--yellow)' : '';
+        el('my-status').textContent = `Apostaste ${total}${emoji} — aguarda os outros`;
+      } else {
+        el('my-status').style.color = '';
+        const lbl = { bet:'Apostaste 🃏', swap:'Trocaste 🔄', pass:'Passaste ⏭' };
+        el('my-status').textContent = (lbl[myAt] || 'Feito') + ' — aguarda os outros';
+      }
       return;
     }
 
@@ -1113,21 +1490,21 @@ function handleTiebreak(st) {
     return;
   }
 
-  // Timer
-  const started = Date.now();
-  clearInterval(_tieInt);
-  _tieInt = setInterval(() => {
-    const rem = Math.max(0, Math.ceil(20 - (Date.now() - started) / 1000));
-    el('tb-timer').textContent = `Tempo restante: ${rem}s`;
-    if (!rem) clearInterval(_tieInt);
-  }, 400);
+  // Timer — only start once per tiebreak phase
+  if (!_tieInt) {
+    const started = Date.now();
+    _tieInt = setInterval(() => {
+      const rem = Math.max(0, Math.ceil(20 - (Date.now() - started) / 1000));
+      el('tb-timer').textContent = `Tempo restante: ${rem}s`;
+      if (!rem) { clearInterval(_tieInt); _tieInt = null; }
+    }, 400);
+  }
 
-  // Eligible cards
+  // Eligible cards — rebuild only if selection changed or first render
   const baelf   = activeBaelf(st);
   const handEl  = el('tb-hand');
   handEl.innerHTML = '';
-  _tbCard = null;
-  el('btn-tb-play').disabled = true;
+  // Do NOT reset _tbCard here — preserve user selection across state updates
 
   for (const c of st.myHand) {
     const eligible = baelf && c.color === baelf.color && c.type !== 'joker';
@@ -1137,7 +1514,27 @@ function handleTiebreak(st) {
       card.onclick = () => {
         _tbCard = _tbCard === c.id ? null : c.id;
         playClick();
-        handleTiebreak(st);
+        renderTbHand(st);
+      };
+    }
+    handEl.appendChild(card);
+  }
+  el('btn-tb-play').disabled = _tbCard === null;
+}
+
+function renderTbHand(st) {
+  const baelf   = activeBaelf(st);
+  const handEl  = el('tb-hand');
+  handEl.innerHTML = '';
+  for (const c of st.myHand) {
+    const eligible = baelf && c.color === baelf.color && c.type !== 'joker';
+    const isSel    = _tbCard === c.id;
+    const card     = mkCharm(c, { clickable: eligible, selected: isSel, invalid: !eligible });
+    if (eligible) {
+      card.onclick = () => {
+        _tbCard = _tbCard === c.id ? null : c.id;
+        playClick();
+        renderTbHand(st);
       };
     }
     handEl.appendChild(card);
@@ -1219,22 +1616,6 @@ function leaveGame() {
 }
 
 // ══════════════════════════════════════════════════════════════
-// MY INFO BADGE
-// ══════════════════════════════════════════════════════════════
-function updateBadge(st) {
-  const me    = st.players[st.myIdx];
-  const badge = el('my-name-badge');
-  badge.textContent   = me.name;
-  badge.style.color   = COLOR_HEX[me.color] || '#aaa';
-  badge.style.borderColor = COLOR_HEX[me.color] || '#aaa';
-  badge.style.background  = COLOR_DIM[me.color] || '#222';
-}
-
-// Patch renderGame to call updateBadge
-const _origRenderGame = renderGame;
-// (Already calls el('my-name-badge') inline — handled in renderGame body above)
-
-// ══════════════════════════════════════════════════════════════
 // AUDIO
 // ══════════════════════════════════════════════════════════════
 let _actx = null;
@@ -1281,29 +1662,45 @@ function playWin() {
 }
 
 // ══════════════════════════════════════════════════════════════
-// PATCH renderGame — update badge inline
+// REFILL BANNER
 // ══════════════════════════════════════════════════════════════
-const __rg = renderGame;
-// Override to also update badge
-window.renderGame = function(st) {
-  __rg(st);
-  // Badge update (me available after _gs set)
-  if (_gs) {
-    const me    = _gs.players[_gs.myIdx];
-    const badge = el('my-name-badge');
-    badge.textContent       = me.name;
-    badge.style.color       = COLOR_HEX[me.color] || '#aaa';
-    badge.style.borderColor = COLOR_HEX[me.color] || '#aaa';
-    badge.style.background  = COLOR_DIM[me.color] || '#222';
-  }
-};
-// Fix dispatch to use window.renderGame
-const _orig_dispatch = dispatch;
-// (dispatch already calls renderGame directly — we patch it via the global override)
-// Simplest fix: override renderGame globally at end of file so calls to renderGame() in dispatch use this
-// Already done since dispatch calls renderGame which is now window.renderGame
-// Actually we need to re-bind. Let's just call the badge update from inside the original renderGame:
-// (Badge update already exists in the original renderGame body — the code above is redundant but harmless)
+function showRefillBanner(n) {
+  const b = el('refill-banner');
+  b.textContent = `🃏 +${n} carta${n !== 1 ? 's' : ''}! Mão reabastecida`;
+  b.style.display = 'block';
+  // Reset animation
+  b.style.animation = 'none';
+  b.offsetHeight; // reflow
+  b.style.animation = 'fadeInOut 2.8s forwards';
+  setTimeout(() => { b.style.display = 'none'; }, 2900);
+}
+
+// ══════════════════════════════════════════════════════════════
+// RULES MODAL
+// ══════════════════════════════════════════════════════════════
+function openRules() { el('rules-overlay').classList.add('show'); }
+function closeRules(){ el('rules-overlay').classList.remove('show'); }
+
+el('btn-close-rules').onclick  = closeRules;
+el('rules-overlay').onclick    = e => { if (e.target === el('rules-overlay')) closeRules(); };
+el('btn-rules-lobby').onclick  = openRules;
+el('btn-rules-game').onclick   = openRules;
+
+// Tab switching
+document.querySelectorAll('.rules-tab').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.rules-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.rules-section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.tab;
+    el('tab-' + tab)?.classList.add('active');
+  };
+});
+
+// Close on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeRules();
+});
 
 // ══════════════════════════════════════════════════════════════
 // SERVICE WORKER + BOOT

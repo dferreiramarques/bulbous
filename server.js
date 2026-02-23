@@ -354,16 +354,64 @@ function dispatch(ws, msg) {
 const MANIFEST = `{
   "name": "Bulbous",
   "short_name": "Bulbous",
+  "description": "Jogo de bluff e estratégia com criaturas mágicas",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#1a1a2e",
-  "theme_color": "#e94560",
+  "orientation": "any",
+  "background_color": "#0d0d1a",
+  "theme_color": "#c084fc",
+  "categories": ["games", "entertainment"],
   "icons": [
-    { "src": "/icon.png", "sizes": "192x192", "type": "image/png" }
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "screenshots": [
+    { "src": "/screenshot.png", "sizes": "1280x800", "type": "image/png", "form_factor": "wide" }
   ]
 }`;
 
-const SW = `self.addEventListener('fetch', e => {});`;
+// Caches the HTML shell so the app loads instantly and works offline
+const SW = `
+const CACHE = 'bulbous-v1';
+const SHELL = ['/'];
+
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)));
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    )
+  );
+  self.clients.claim();
+});
+
+self.addEventListener('fetch', e => {
+  // WebSocket requests: never intercept
+  if (e.request.url.startsWith('ws')) return;
+  // Navigation: serve shell from cache, falling back to network
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      caches.match('/').then(r => r || fetch(e.request))
+    );
+    return;
+  }
+  // Assets: network first, cache as fallback
+  e.respondWith(
+    fetch(e.request)
+      .then(r => {
+        const clone = r.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+        return r;
+      })
+      .catch(() => caches.match(e.request))
+  );
+});
+`;
 
 // ══════════════════════════════════════════════════════════════════════════════
 // STATIC FILE SERVER

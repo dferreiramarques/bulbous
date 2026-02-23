@@ -390,6 +390,65 @@ input  { font: inherit; }
 }
 .rule-box strong { color: var(--accent); }
 
+/* PWA Install Banner */
+#pwa-banner {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 800;
+  background: linear-gradient(135deg, #1f1f38, #2a1a4a);
+  border-top: 1px solid var(--accent);
+  padding: 14px 20px 18px; /* extra bottom for home-indicator bar */
+  display: flex; align-items: center; gap: 14px;
+  animation: slideUp .35s ease;
+}
+#pwa-banner.hidden { display: none !important; }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.pwa-icon {
+  width: 52px; height: 52px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--accent), #7c3aed);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+}
+.pwa-text { flex: 1; }
+.pwa-text strong { display: block; font-size: .95rem; color: #fff; margin-bottom: 2px; }
+.pwa-text span   { font-size: .78rem; color: var(--muted); }
+#btn-pwa-install {
+  padding: 10px 18px; background: var(--accent); color: #0d0d1a;
+  border-radius: 8px; font-weight: 700; font-size: .9rem; white-space: nowrap; flex-shrink: 0;
+}
+#btn-pwa-dismiss {
+  padding: 8px; background: transparent; border: none;
+  color: var(--muted); font-size: 1.1rem; cursor: pointer; flex-shrink: 0;
+}
+
+/* iOS install guide sheet */
+#ios-install-sheet {
+  display: none; position: fixed; inset: 0; z-index: 850;
+  background: rgba(0,0,0,.78); backdrop-filter: blur(6px);
+  align-items: flex-end; justify-content: center;
+}
+#ios-install-sheet.show { display: flex; }
+.ios-sheet-box {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 18px 18px 0 0; padding: 24px 24px 36px;
+  width: 100%; max-width: 480px; text-align: center;
+  animation: slideUp .3s ease;
+}
+.ios-sheet-box h3 { font-size: 1.1rem; color: var(--accent); margin-bottom: 8px; }
+.ios-sheet-box p  { font-size: .88rem; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+.ios-step {
+  background: var(--surface); border-radius: 10px; padding: 12px 16px;
+  margin-bottom: 10px; display: flex; align-items: center; gap: 12px; text-align: left;
+}
+.ios-step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent);
+  color: #0d0d1a; font-weight: 800; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: .9rem; }
+.ios-step p { margin: 0; font-size: .85rem; color: var(--text); }
+.ios-step strong { color: var(--accent); }
+#btn-ios-close {
+  margin-top: 16px; padding: 12px 30px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 10px; color: var(--muted);
+  font-size: .9rem; width: 100%;
+}
+
 /* Refill banner */
 #refill-banner {
   display: none; position: fixed; top: 50px; left: 50%; transform: translateX(-50%);
@@ -409,6 +468,38 @@ input  { font: inherit; }
 
 <div id="toast"></div>
 <div id="refill-banner">🃏 Mão reabastecida!</div>
+<!-- PWA Install Banner (Android / Chrome) -->
+<div id="pwa-banner" class="hidden">
+  <div class="pwa-icon">🍄</div>
+  <div class="pwa-text">
+    <strong>Instalar Bulbous</strong>
+    <span>Adiciona ao ecrã principal para jogar sem browser</span>
+  </div>
+  <button id="btn-pwa-install">Instalar</button>
+  <button id="btn-pwa-dismiss">✕</button>
+</div>
+
+<!-- iOS Install Guide Sheet -->
+<div id="ios-install-sheet">
+  <div class="ios-sheet-box">
+    <h3>🍄 Instalar Bulbous no iPhone</h3>
+    <p>O iOS não permite instalação automática, mas podes adicionar à janela inicial em 3 passos:</p>
+    <div class="ios-step">
+      <div class="ios-step-num">1</div>
+      <p>Toca no ícone de <strong>Partilha</strong> <strong>⬆</strong> na barra do Safari (em baixo ou em cima)</p>
+    </div>
+    <div class="ios-step">
+      <div class="ios-step-num">2</div>
+      <p>Desliza e escolhe <strong>"Adicionar ao ecrã principal"</strong></p>
+    </div>
+    <div class="ios-step">
+      <div class="ios-step-num">3</div>
+      <p>Confirma com <strong>"Adicionar"</strong> — o jogo aparece como app!</p>
+    </div>
+    <button id="btn-ios-close">Entendido</button>
+  </div>
+</div>
+
 
 <!-- ═══ RULES MODAL ═══════════════════════════════════════════ -->
 <div id="rules-overlay">
@@ -1700,6 +1791,63 @@ document.querySelectorAll('.rules-tab').forEach(btn => {
 // Close on Escape
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeRules();
+});
+
+// ══════════════════════════════════════════════════════════════
+// PWA INSTALL PROMPT
+// ══════════════════════════════════════════════════════════════
+let _deferredInstall = null;
+
+// Android / Chrome: capture the install prompt
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _deferredInstall = e;
+  // Only show if not already installed and not dismissed this session
+  if (!sessionStorage.getItem('pwa_dismissed') && !isPwaInstalled()) {
+    el('pwa-banner').classList.remove('hidden');
+  }
+});
+
+// Hide banner if already running as standalone
+function isPwaInstalled() {
+  return window.matchMedia('(display-mode: standalone)').matches ||
+         window.navigator.standalone === true;
+}
+
+el('btn-pwa-install').onclick = async () => {
+  if (!_deferredInstall) return;
+  el('pwa-banner').classList.add('hidden');
+  _deferredInstall.prompt();
+  const { outcome } = await _deferredInstall.userChoice;
+  _deferredInstall = null;
+  if (outcome === 'accepted') sessionStorage.setItem('pwa_dismissed', '1');
+};
+
+el('btn-pwa-dismiss').onclick = () => {
+  el('pwa-banner').classList.add('hidden');
+  sessionStorage.setItem('pwa_dismissed', '1');
+};
+
+el('btn-ios-close').onclick = () => {
+  el('ios-install-sheet').classList.remove('show');
+  sessionStorage.setItem('pwa_dismissed', '1');
+};
+
+// iOS Safari: show guide if not installed and not dismissed
+function checkIosInstallPrompt() {
+  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isSafari = /safari/i.test(navigator.userAgent) && !/chrome|crios|fxios/i.test(navigator.userAgent);
+  if (isIos && isSafari && !isPwaInstalled() && !sessionStorage.getItem('pwa_dismissed')) {
+    // Small delay so the page loads first
+    setTimeout(() => el('ios-install-sheet').classList.add('show'), 2000);
+  }
+}
+checkIosInstallPrompt();
+
+// App was installed
+window.addEventListener('appinstalled', () => {
+  el('pwa-banner').classList.add('hidden');
+  _deferredInstall = null;
 });
 
 // ══════════════════════════════════════════════════════════════

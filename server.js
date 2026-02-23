@@ -30,6 +30,7 @@ const MIME = {
   '.mp3':  'audio/mpeg',
   '.mp4':  'video/mp4',
   '.webmanifest': 'application/manifest+json',
+  '.ico': 'image/x-icon',
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -393,7 +394,7 @@ self.addEventListener('fetch', e => {
   if (e.request.mode === 'navigate') return;
   // Cache card images and icons (static assets)
   const url = new URL(e.request.url);
-  if (url.pathname.startsWith('/cards/') || url.pathname.startsWith('/icon')) {
+  if (url.pathname.startsWith('/cards/') || url.pathname.startsWith('/icon') || url.pathname.startsWith('/favicon')) {
     e.respondWith(
       caches.match(e.request).then(cached => {
         if (cached) return cached;

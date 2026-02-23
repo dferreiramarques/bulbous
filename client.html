@@ -7,6 +7,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
 <title>Bulbous</title>
 <style>
 /* ═══════════════════════════════════════════════════════
@@ -264,12 +267,12 @@ input  { font: inherit; }
   flex-shrink: 0; display: flex; flex-direction: column;
   gap: 8px; padding: 10px 16px; max-height: 52vh; overflow-y: auto;
 }
-#my-info-row   { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+#my-info-row   { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; }
 #my-name-badge {
   font-size: .92rem; font-weight: 700; padding: 3px 11px;
   border-radius: 5px; border: 1px solid; white-space: nowrap;
 }
-#my-status     { font-size: .85rem; color: var(--muted); flex: 1; }
+#my-status     { font-size: .85rem; color: var(--muted); flex: 1; text-align: center; }
 #my-baelfs-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; justify-content: center; overflow-y: visible; }
 .my-baelf-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .my-baelf-tag  { font-size: .65rem; color: var(--muted); white-space: nowrap; }

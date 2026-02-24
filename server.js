@@ -125,18 +125,22 @@ function scheduleBots(lobby) {
   clearTimeout(lobby.botTimer);
   const gen = lobby.game.turnGen;
   lobby.botTimer = setTimeout(() => {
-    const g = lobby.game;
-    if (!g || g.turnGen !== gen) return;
-    const act = getBotAction(g);
-    if (!act) return;
-    const result = handleAction(g, act.playerIdx, act.msg);
-    if (result.error) {
-      console.warn('[BOT]', result.error);
-      return;
+    try {
+      const g = lobby.game;
+      if (!g || g.turnGen !== gen) return;
+      const act = getBotAction(g);
+      if (!act) return;
+      const result = handleAction(g, act.playerIdx, act.msg);
+      if (result.error) {
+        console.warn('[BOT]', result.error);
+        return;
+      }
+      broadcastGame(lobby);
+      scheduleBots(lobby);
+      maybeStartTieTimer(lobby);
+    } catch (e) {
+      console.error('[BOT ERROR]', e);
     }
-    broadcastGame(lobby);
-    scheduleBots(lobby);
-    maybeStartTieTimer(lobby);
   }, BOT_MS);
 }
 
@@ -489,6 +493,15 @@ wss.on('connection', ws => {
     // Null the socket but keep seat reserved during grace period
     lobby.players[seat] = null;
 
+    // ── Solo mode: keep game + session alive so human can reconnect anytime ──
+    // Never abort a solo game due to disconnect (cold start, mobile background, etc.)
+    if (lobby.solo) {
+      broadcastLobbyList();
+      // No grace timer — session persists until explicit LEAVE_LOBBY
+      return;
+    }
+
+    // ── Multiplayer: notify others and start grace timer ──
     lobby.players.forEach((p, i) => {
       if (p && i !== seat)
         send(p, { type: 'OPPONENT_DISCONNECTED_GRACE', seat, name, graceMs: GRACE_MS });

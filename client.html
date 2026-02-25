@@ -230,12 +230,12 @@ input  { font: inherit; }
 .baelf-card.selected  { border-color: var(--accent) !important; box-shadow: 0 0 16px var(--accent); z-index: 30; position: relative; transform: translateY(-4px); }
 .baelf-card.contested { border-color: var(--yellow) !important; }
 .baelf-card.complete  { opacity: .45; }
-/* Centre-area cards: 150% of default */
+/* Centre-area baelf cards: 150% */
 #centre-area .baelf-card {
   width: var(--centre-baelf-w);
   height: calc(var(--centre-baelf-w) * 15 / 9);
 }
-/* My baelf row: 80% of default */
+/* My baelf row: 80% */
 #my-baelfs-row .baelf-card {
   width: var(--my-baelf-w);
   height: calc(var(--my-baelf-w) * 15 / 9);
@@ -1154,13 +1154,14 @@ function oppActionInfo(st, i) {
   // ── After a trick resolved: show totals + winner ─────────────
   if (lr && st.phase === 'PLAYER_ACTIONS') {
     const at  = st.trick?.actionTypes?.[i];
-    const sc  = lr.scores?.[i];
+    const sc  = lr.scores?.[i];    // null for pass/swap, object for bet
     const isW = lr.winner === i || lr.tieWinner === i;
     const isTied = lr.tiedPlayers?.includes(i);
-    if (sc !== undefined) {
+    // Always show pass/swap even when sc is null
+    if (at === 'pass') return { text: '⏭ Passou', color: 'var(--muted)' };
+    if (at === 'swap') return { text: '🔄 Trocou', color: '#7ab8ff' };
+    if (sc != null) {   // only bet players have a non-null score
       const total = sc.total === Infinity ? '∞' : sc.total;
-      if (at === 'pass') return { text: '⏭ Passou', color: 'var(--muted)' };
-      if (at === 'swap') return { text: '🔄 Trocou', color: '#7ab8ff' };
       const trophy = isW ? ' 🏆' : isTied ? ' ⚔️' : '';
       return { text: `${total}${trophy}`, color: isW ? 'var(--yellow)' : COLOR_HEX[p.color] || '#aaa' };
     }

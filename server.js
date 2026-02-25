@@ -132,14 +132,17 @@ function scheduleBots(lobby) {
       if (!act) return;
       const result = handleAction(g, act.playerIdx, act.msg);
       if (result.error) {
-        console.warn('[BOT]', result.error);
+        console.warn('[BOT]', act.playerIdx, act.msg.type, '\u2192', result.error);
+        // Never stop the chain on error -- reschedule so next bot can act
+        scheduleBots(lobby);
         return;
       }
       broadcastGame(lobby);
       scheduleBots(lobby);
       maybeStartTieTimer(lobby);
     } catch (e) {
-      console.error('[BOT ERROR]', e);
+      console.error('[BOT CRASH]', e);
+      setTimeout(() => scheduleBots(lobby), 2000);
     }
   }, BOT_MS);
 }
@@ -490,18 +493,18 @@ wss.on('connection', ws => {
     const seat = st.seat;
     const name = lobby.names[seat];
 
-    // Null the socket but keep seat reserved during grace period
+    // Null the socket but keep seat reserved
     lobby.players[seat] = null;
 
-    // ── Solo mode: keep game + session alive so human can reconnect anytime ──
-    // Never abort a solo game due to disconnect (cold start, mobile background, etc.)
+    // ── Solo: never abort the game on disconnect.
+    // Cold-starts, mobile backgrounding, etc. cause brief drops.
+    // The bot loop keeps running; the human reconnects via their token.
     if (lobby.solo) {
       broadcastLobbyList();
-      // No grace timer — session persists until explicit LEAVE_LOBBY
       return;
     }
 
-    // ── Multiplayer: notify others and start grace timer ──
+    // ── Multiplayer: notify others and start grace timer ──────────
     lobby.players.forEach((p, i) => {
       if (p && i !== seat)
         send(p, { type: 'OPPONENT_DISCONNECTED_GRACE', seat, name, graceMs: GRACE_MS });

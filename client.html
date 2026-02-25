@@ -31,11 +31,13 @@
   --blue-dim:  #0f2040;
   --green-dim: #0d2e24;
   --yellow-dim:#3a2a08;
-  --card-w:    88px;
-  --card-h:    123px;
-  --baelf-w:   95px;
-  --baelf-h:   165px;
-  --radius:    10px;
+  --card-w:      88px;
+  --card-h:      123px;
+  --baelf-w:     95px;
+  --baelf-h:     165px;
+  --centre-baelf-w: 143px;
+  --my-baelf-w:  76px;
+  --radius:      10px;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 16px; }
@@ -181,19 +183,20 @@ input  { font: inherit; }
 .opp-name    { font-size: .88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .opp-meta    { font-size: .78rem; color: var(--muted); }
 .opp-action  { font-size: .8rem; min-height: 1.1rem; font-weight: 600; }
-.opp-baelfs  { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
+.opp-baelfs  { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; align-items: flex-start; }
 
 /* Mini baelfungious — sized to show bulb distribution clearly */
 .mini-baelf {
-  width: 36px; height: 60px; border-radius: 5px; border: 1px solid var(--border);
-  display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-  padding: 3px 2px; font-size: .65rem; overflow: hidden; position: relative;
+  width: 64px; height: 32px; border-radius: 5px; border: 1px solid var(--border);
+  display: flex; flex-direction: row; align-items: center; justify-content: space-between;
+  padding: 2px 5px; font-size: .6rem; overflow: hidden; position: relative; flex-shrink: 0;
 }
-.mini-baelf.active-slot { border-width: 2px; }
+.mini-baelf.active-slot { border-width: 2px; height: 42px; }
 .mini-baelf.complete    { opacity: .35; }
-.mini-slot-dots { display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; }
-.mini-slot-dot  { width: 8px; height: 8px; border-radius: 50%; border: 1px solid rgba(255,255,255,.15); background: transparent; }
+.mini-slot-dots { display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; align-items: center; flex: 1; }
+.mini-slot-dot  { width: 7px; height: 7px; border-radius: 50%; border: 1px solid rgba(255,255,255,.2); background: transparent; flex-shrink: 0; }
 .mini-slot-dot.filled { border-color: transparent; filter: brightness(1.3) saturate(1.5); box-shadow: 0 0 3px currentColor; }
+.mini-count { font-size: .52rem; opacity: .7; color: #fff; white-space: nowrap; margin-left: 3px; line-height: 1; }
 
 /* Centre */
 #centre-area {
@@ -227,6 +230,17 @@ input  { font: inherit; }
 .baelf-card.selected  { border-color: var(--accent) !important; box-shadow: 0 0 16px var(--accent); z-index: 30; position: relative; transform: translateY(-4px); }
 .baelf-card.contested { border-color: var(--yellow) !important; }
 .baelf-card.complete  { opacity: .45; }
+/* Centre-area cards: 150% of default */
+#centre-area .baelf-card {
+  width: var(--centre-baelf-w);
+  height: calc(var(--centre-baelf-w) * 15 / 9);
+}
+/* My baelf row: 80% of default */
+#my-baelfs-row .baelf-card {
+  width: var(--my-baelf-w);
+  height: calc(var(--my-baelf-w) * 15 / 9);
+}
+
 /* Image fills card, full from top — no offset */
 .baelf-card img.baelf-img {
   position: absolute; inset: 0; width: 100%; height: 100%;
@@ -1067,7 +1081,9 @@ function mkMiniBaelf(baelf, isActive) {
     }
     dots.appendChild(d);
   }
+  const countEl = ce('div', 'mini-count', `${baelf.bulbs.length}/${baelf.slots}`);
   div.appendChild(dots);
+  div.appendChild(countEl);
   return div;
 }
 

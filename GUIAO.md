@@ -1,6 +1,6 @@
 # Bulbous — Guião para Explicar o Jogo (informal)
 
-Isto não é o rulebook (ver `REGRAS.md`). É um guião para dizeres em voz alta a quem nunca jogou, por esta ordem. Fala normal, não leias tudo — usa isto como apoio.
+Isto não é o rulebook. É um guião para dizeres em voz alta a quem nunca jogou, por esta ordem. Fala normal, não leias tudo — usa isto como apoio.
 
 Bulbous tem 3 modos: **2 jogadores**, **4 jogadores**, e **4 jogadores cooperativo-competitivo (2+2)**. Os dois primeiros estão explicados de forma independente e completa abaixo — usa só a secção do modo que vão jogar. O modo de equipas está a seguir, só como nota do que muda em relação ao de 4 jogadores.
 

@@ -118,9 +118,3 @@ R: Não. É só um marcador — nunca é colocado numa Baelfungious e não pontu
 - Coleção de Conjuntos
 - Vazas (Trick-Taking)
 - Jogo em Equipas (2 contra 2)
-
----
-
-## IX. Nota de Implementação Online
-
-A versão online (`game.js`) segue estas regras com uma única diferença deliberada: os bolbos **não têm limite** de 14/jogador — funcionam apenas como contador de pontos, sem gestão de peças físicas a fazer online. Todo o resto (sequência declarada, 3 modos, pontuação, bónus de coleção +5/+10) está implementado tal como descrito acima.

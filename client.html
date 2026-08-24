@@ -236,8 +236,12 @@ input  { font: inherit; }
 .baelf-card.clickable { cursor: pointer; }
 .baelf-card.clickable:hover { transform: translateY(-6px); box-shadow: 0 10px 22px #00000080; z-index: 30; position: relative; }
 .baelf-card.selected  { border-color: var(--accent) !important; box-shadow: 0 0 16px var(--accent); z-index: 30; position: relative; transform: translateY(-4px); }
-.baelf-card.contested { border-color: var(--yellow) !important; }
+.baelf-card.contested {
+  border-color: var(--yellow) !important;
+  box-shadow: 0 0 22px 3px var(--yellow), 0 0 8px 2px #fff9;
+}
 .baelf-card.complete  { opacity: .45; }
+.baelf-card.past-trick { filter: brightness(.8); }
 /* Centre-area baelf cards: 150% */
 #centre-area .baelf-card {
   width: var(--centre-baelf-w);
@@ -1056,6 +1060,7 @@ function mkBaelf(baelf, opts = {}) {
     (opts.clickable ? ' clickable' : '') +
     (opts.selected  ? ' selected'  : '') +
     (opts.contested ? ' contested' : '') +
+    (opts.pastTrick ? ' past-trick' : '') +
     (baelf.complete ? ' complete'  : ''));
 
   div.style.borderColor = COLOR_HEX[baelf.color] || '#555';
@@ -1286,18 +1291,21 @@ function renderCentre(st) {
       }
 
       // Declared-sequence position badge — 1ª/2ª/3ª/4ª
-      if (seqSource) {
-        const pos = seqSource.findIndex(o => o.playerIdx === pi && o.slotIdx === si);
-        if (pos !== -1) slot.appendChild(ce('div', 'seq-badge', (pos + 1) + 'ª'));
-      }
+      const pos = seqSource ? seqSource.findIndex(o => o.playerIdx === pi && o.slotIdx === si) : -1;
+      if (pos !== -1) slot.appendChild(ce('div', 'seq-badge', (pos + 1) + 'ª'));
 
       const isSelectable = isGovSeq;
       const isSel = _seqOrder.some(o => o.playerIdx === pi && o.slotIdx === si);
+
+      // Already resolved earlier in this round's declared sequence (dim it),
+      // vs the trick currently being disputed (isTarget — glow instead).
+      const isPastTrick = st.trickQueue && pos !== -1 && !isTarget && pos < st.trickNum;
 
       const card = mkBaelf(baelf, {
         clickable: isSelectable,
         selected:  isSel,
         contested: isTarget,
+        pastTrick: isPastTrick,
       });
 
       if (isSelectable) {

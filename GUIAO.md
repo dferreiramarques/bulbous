@@ -14,7 +14,7 @@ Bulbous tem 3 modos: **2 jogadores**, **4 jogadores**, e **4 jogadores cooperati
 
 ### Preparar a mesa
 
-1. "Escolhe um símbolo — Triângulo ou Círculo." — cada jogador fica com 2 conjuntos completos de cartas grandes desse símbolo (8 cartas: 2 Líder, 2 Bailiff, 2 Adulto, 2 Juvenil) e 15 bolbos.
+1. "Escolhe um símbolo — Triângulo ou Círculo." — cada jogador fica com 2 conjuntos completos de cartas grandes desse símbolo (8 cartas: 2 Líder, 2 Bailio, 2 Adulto, 2 Juvenil) e 15 bolbos.
 2. "Põe um bolbo de lado, sozinho — é o teu Bolbo de Ronda, não é para pontuar, é só um marcador. Ficas com 14 para jogar."
 3. "Põe as tuas 8 cartas grandes à tua frente."
 4. Baralha as Cartas de Charme e dá **9** a cada jogador.

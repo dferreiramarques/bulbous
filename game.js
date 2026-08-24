@@ -723,7 +723,7 @@ function calcFinalScore(g) {
     }
 
     // Track for collection bonus. b.slots (1-4) is the specimen type:
-    // 1=Juvenil, 2=Adulto, 3=Bailiff, 4=Líder.
+    // 1=Juvenil, 2=Adulto, 3=Bailio, 4=Líder.
     for (const li of leaders) {
       s[li].controlled.colors.add(b.color);
       s[li].controlled.types.add(b.slots);
@@ -733,7 +733,7 @@ function calcFinalScore(g) {
   // 3. Collection bonuses (rulebook VI.3)
   for (const sc of s) {
     if (sc.controlled.colors.size >= 4) sc.collection += 5;  // Todas as Cores
-    if (sc.controlled.types.size  >= 4) sc.collection += 10; // Todos os Espécimes (Líder, Bailiff, Adulto, Juvenil)
+    if (sc.controlled.types.size  >= 4) sc.collection += 10; // Todos os Espécimes (Líder, Bailio, Adulto, Juvenil)
     sc.total = sc.bulbs + sc.majority + sc.collection;
     // Convert sets to arrays for JSON serialisation
     sc.controlled.colors = [...sc.controlled.colors];

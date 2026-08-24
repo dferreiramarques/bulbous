@@ -28,7 +28,7 @@ Bulbous joga-se com **2 jogadores**, **4 jogadores** (individual) ou **4 jogador
 
 ### B. Jogo de 2 Jogadores
 
-1. Cada jogador escolhe um símbolo (Triângulo ou Círculo) e fica com 2 conjuntos de cartas de Baelfungious desse símbolo, num total de 8 cartas (2 Líder, 2 Bailiff, 2 Adulto, 2 Juvenil).
+1. Cada jogador escolhe um símbolo (Triângulo ou Círculo) e fica com 2 conjuntos de cartas de Baelfungious desse símbolo, num total de 8 cartas (2 Líder, 2 Bailio, 2 Adulto, 2 Juvenil).
 2. Cada jogador fica com 15 bolbos: separa já 1 como Bolbo de Ronda, ficando com 14 para jogar.
 3. Baralha o baralho de Cartas de Charme. Cada jogador tira 9 cartas.
 4. Cada jogador empurra 2 Cartas de Baelfungious para o centro da mesa. No total há 4 Baelfungious ativas para a ronda (2 de cada jogador).
@@ -86,7 +86,7 @@ A pontuação é sempre calculada por jogador individual, em todos os modos de j
    - **Empate na Maioria** — Se os jogadores empatarem no maior número de bolbos, cada jogador empatado ganha +1 ponto.
 3. **Bónus de Coleção** (opcional):
    - **Todas as Cores** — +5 pontos se completares pelo menos uma Baelfungious de cada cor.
-   - **Todos os Espécimes** — +10 pontos se completares um conjunto dos 4 tipos (Líder, Bailiff, Adulto, Juvenil).
+   - **Todos os Espécimes** — +10 pontos se completares um conjunto dos 4 tipos (Líder, Bailio, Adulto, Juvenil).
 
 ### 4. Como Vencer
 

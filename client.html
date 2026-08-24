@@ -183,6 +183,10 @@ input  { font: inherit; }
 .opp-name    { font-size: .88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .opp-meta    { font-size: .78rem; color: var(--muted); }
 .opp-action  { font-size: .8rem; min-height: 1.1rem; font-weight: 600; }
+.opp-action.recap {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+  padding: 2px 6px; margin-top: 1px;
+}
 .opp-baelfs  { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; align-items: flex-start; }
 
 /* Mini baelfungious — sized to show bulb distribution clearly */
@@ -191,7 +195,10 @@ input  { font: inherit; }
   display: flex; flex-direction: row; align-items: center; justify-content: space-between;
   padding: 2px 5px; font-size: .6rem; overflow: hidden; position: relative; flex-shrink: 0;
 }
-.mini-baelf.active-slot { border-width: 2px; height: 42px; }
+/* outline (not border/height) so "active" never resizes the panel — a
+   size change here rewrites #opponents-area's height, which pushes the
+   whole board up/down since centre-area fills whatever space is left. */
+.mini-baelf.active-slot { outline: 2px solid var(--accent); outline-offset: 1px; }
 .mini-baelf.complete    { opacity: .35; }
 .mini-slot-dots { display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; align-items: center; flex: 1; }
 .mini-slot-dot  { width: 7px; height: 7px; border-radius: 50%; border: 1px solid rgba(255,255,255,.2); background: transparent; flex-shrink: 0; }
@@ -222,6 +229,10 @@ input  { font: inherit; }
   border-radius: 999px; border: 2px solid #fff;
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 2px 10px #000000cc;
+}
+.trick-pips {
+  display: flex; gap: 3px; flex-wrap: wrap; justify-content: center;
+  align-items: center; margin-top: 3px; height: 13px;
 }
 
 /* Baelfungious card */
@@ -299,6 +310,10 @@ input  { font: inherit; }
   border-radius: 5px; border: 1px solid; white-space: nowrap;
 }
 #my-status     { font-size: .85rem; color: var(--muted); text-align: center; }
+#my-status.recap {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+  padding: 3px 10px; font-weight: 600; font-size: .9rem;
+}
 #my-baelfs-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; justify-content: center; overflow-y: visible; }
 .my-baelf-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .my-baelf-tag  { font-size: .65rem; color: var(--muted); white-space: nowrap; }
@@ -838,6 +853,13 @@ let _lobbies    = [];
 let _gs         = null;   // current game state (buildView output)
 let _prevPhase  = '';
 let _prevHandSize = 0;
+// Trick-recap pause: when a trick resolves (clear winner, not a tie), freeze
+// a "who bet what / who won" badge on every player's panel and replace the
+// action bar with a single Continuar button, instead of silently jumping
+// straight into the next trick/phase.
+let _recapOpen  = false;
+let _recapKey   = '';
+let _recapLr    = null;
 let _mode       = '';     // ''|'bet'|'swap'
 let _selCards   = [];     // card ids selected
 let _selBaelf   = null;   // {baelfIdx?} or {playerIdx,slotIdx}
@@ -1192,35 +1214,69 @@ function renderGame(st) {
   }
   _prevHandSize = st.myHand?.length ?? 0;
 
+  // Detect a freshly-resolved trick (clear winner — ties get their own
+  // tiebreak-result pause, and GAME_OVER gets its own final overlay) and
+  // freeze a recap of it until the player clicks Continuar, instead of
+  // silently jumping into whatever the game has already moved on to.
+  const lr = st.lastTrickResult;
+  if (lr && !lr.tied && st.phase !== 'GAME_OVER') {
+    const key = `${lr.trickTargetPlayerIdx}-${lr.trickTargetSlotIdx}-${st.roundNum}`;
+    if (_recapKey !== key) {
+      _recapKey  = key;
+      _recapOpen = true;
+      _recapLr   = lr;
+    }
+  }
+
   renderOpponents(st);
   renderCentre(st);
   renderMyBaelfs(st);
-  renderActionBar(st);
+  el('my-status').classList.toggle('recap', _recapOpen);
+  if (_recapOpen) renderRecapBar(st); else renderActionBar(st);
   renderHand(st);
   handleOverlays(st);
+}
+
+// Extracts { text, color } describing what player `i` did in a frozen
+// trick-result snapshot (`lr`) — bet total (+ trophy if they won), or
+// pass/swap. Shared by the opponent panels and my own status line.
+function recapInfoFor(lr, st, i) {
+  const p  = st.players[i];
+  const at = lr.actionTypes?.[i];
+  if (at === 'pass') return { text: '⏭ Passou', color: 'var(--muted)' };
+  if (at === 'swap') return { text: '🔄 Trocou', color: '#7ab8ff' };
+  const sc = lr.scores?.[i];
+  if (sc != null) {
+    const total  = sc.total === Infinity ? '∞' : sc.total;
+    const isW    = lr.winner === i;
+    const trophy = isW ? ' 🏆' : '';
+    return { text: `Apostou ${total}${trophy}`, color: isW ? 'var(--yellow)' : COLOR_HEX[p.color] || '#aaa' };
+  }
+  return { text: '— não jogou —', color: 'var(--muted)' };
+}
+
+// Replaces the action bar with a single Continuar button while a trick
+// recap is frozen on screen, and fills in my own recap line.
+function renderRecapBar(st) {
+  const { text, color } = recapInfoFor(_recapLr, st, st.myIdx);
+  el('my-status').textContent = text;
+  el('my-status').style.color = color;
+
+  const bar = el('action-bar');
+  bar.innerHTML = '';
+  bar.appendChild(mkBtn('▶ Continuar', 'btn-confirm', () => {
+    _recapOpen = false;
+    renderGame(_gs);
+  }));
 }
 
 // ── Opponents ─────────────────────────────────────────────────
 // Returns action text + colour for one player index given current state
 function oppActionInfo(st, i) {
   const p   = st.players[i];
-  const lr  = st.lastTrickResult;
 
-  // ── After a trick resolved: show totals + winner ─────────────
-  if (lr && st.phase === 'PLAYER_ACTIONS') {
-    const at  = st.trick?.actionTypes?.[i];
-    const sc  = lr.scores?.[i];    // null for pass/swap, object for bet
-    const isW = lr.winner === i || lr.tieWinner === i;
-    const isTied = lr.tiedPlayers?.includes(i);
-    // Always show pass/swap even when sc is null
-    if (at === 'pass') return { text: '⏭ Passou', color: 'var(--muted)' };
-    if (at === 'swap') return { text: '🔄 Trocou', color: '#7ab8ff' };
-    if (sc != null) {   // only bet players have a non-null score
-      const total = sc.total === Infinity ? '∞' : sc.total;
-      const trophy = isW ? ' 🏆' : isTied ? ' ⚔️' : '';
-      return { text: `${total}${trophy}`, color: isW ? 'var(--yellow)' : COLOR_HEX[p.color] || '#aaa' };
-    }
-  }
+  // ── Frozen trick recap (see renderRecapBar) takes over completely ────
+  if (_recapOpen) return recapInfoFor(_recapLr, st, i);
 
   // ── During PLAYER_ACTIONS ─────────────────────────────────────
   if (st.trick && (st.phase === 'PLAYER_ACTIONS' || st.trick?.revealed)) {
@@ -1268,10 +1324,11 @@ function renderOpponents(st) {
     const meta = ce('div','opp-meta', `🂠 ${p.handSize} carta${p.handSize !== 1 ? 's' : ''}`);
 
     const { text, color } = oppActionInfo(st, i);
-    const actionEl = ce('div','opp-action', text);
+    const actionEl = ce('div','opp-action' + (_recapOpen ? ' recap' : ''), text);
     actionEl.style.color = color;
     // Make winning score big & bright
-    if (st.lastTrickResult && (st.lastTrickResult.winner === i || st.lastTrickResult.tieWinner === i)) {
+    const lrForEmphasis = _recapOpen ? _recapLr : st.lastTrickResult;
+    if (lrForEmphasis && (lrForEmphasis.winner === i || lrForEmphasis.tieWinner === i)) {
       actionEl.style.fontSize = '1.05rem';
     }
 
@@ -1343,10 +1400,14 @@ function renderCentre(st) {
         };
       }
 
-      // Bet indicators during PLAYER_ACTIONS
+      // Bet-indicator row — ALWAYS present (fixed height via .trick-pips),
+      // populated only when relevant. Appending this div only sometimes
+      // used to change the column's total height, which re-centered the
+      // whole card row vertically every time a bet came in — that's the
+      // "card keeps sliding up/down" jump. Reserving the space always
+      // keeps every column the same height regardless of phase.
+      const pips = ce('div', 'trick-pips');
       if (isTarget && st.phase === 'PLAYER_ACTIONS' && t.actionTypes) {
-        const pips = ce('div');
-        pips.style.cssText = 'display:flex;gap:3px;flex-wrap:wrap;justify-content:center;margin-top:3px';
         for (let bi2 = 0; bi2 < st.players.length; bi2++) {
           const at = t.actionTypes[bi2];
           if (at === null) continue;
@@ -1355,8 +1416,8 @@ function renderCentre(st) {
           pip.title = st.players[bi2].name + ' · ' + (at||'?');
           pips.appendChild(pip);
         }
-        slot.appendChild(pips);
       }
+      slot.appendChild(pips);
 
       slot.appendChild(card);
       area.appendChild(slot);
@@ -1607,6 +1668,9 @@ function closeOverlays() {
   clearInterval(_tieInt);
   _tieResultOpen = false;
   _tieResultKey  = '';
+  _recapOpen = false;
+  _recapKey  = '';
+  _recapLr   = null;
 }
 
 // ── Reveal ────────────────────────────────────────────────────

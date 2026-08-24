@@ -1,4 +1,4 @@
-# Bulbous — Deploy no GitHub + Render.com
+# Bulbous — Deploy no GitHub + Railway
 
 ---
 
@@ -54,31 +54,23 @@ GitHub → Settings → Developer Settings → Personal Access Tokens → Genera
 
 ---
 
-## Passo 3 — Deploy no Render.com
+## Passo 3 — Deploy no Railway
 
-1. Vai a [render.com](https://render.com) → cria conta com "Sign in with GitHub"
-2. Clica **"New +"** → **"Web Service"**
-3. Seleciona o repositório `bulbous`
-4. Preenche os campos:
+1. Vai a [railway.com](https://railway.com) → cria conta com "Login with GitHub"
+2. Clica **"New Project"**
+3. Escolhe **"Deploy from GitHub repo"**
+4. Seleciona o repositório `bulbous` (se pedir, autoriza o Railway a aceder aos teus repositórios)
+5. O Railway deteta automaticamente que é um projeto Node.js (lê o `package.json`) e começa o deploy sozinho — não precisas de configurar Build/Start Command
+6. Quando terminar (~1-2 min), clica no serviço criado → separador **"Settings"** → secção **"Networking"** → clica **"Generate Domain"**
 
-| Campo | Valor |
-|---|---|
-| **Name** | `bulbous` |
-| **Region** | Frankfurt EU |
-| **Branch** | `main` |
-| **Runtime** | `Node` |
-| **Build Command** | `npm install` |
-| **Start Command** | `node server.js` |
-| **Instance Type** | `Free` |
-
-5. Clica **"Create Web Service"** — pronto em ~2 min
-
-URL do jogo:
+URL do jogo (o Railway gera um domínio parecido com este):
 ```
-https://bulbous.onrender.com
+https://bulbous-production.up.railway.app
 ```
 
-O HTTPS é automático no Render — necessário para o PWA. ✓
+O HTTPS é automático no Railway — necessário para o PWA. ✓
+
+O Railway não tem o "sleep" do plano grátis do Render — o servidor fica sempre acordado, não precisas do UptimeRobot da secção abaixo (essa secção fica só como referência caso voltes a usar o Render).
 
 ---
 
@@ -93,12 +85,16 @@ O HTTPS é automático no Render — necessário para o PWA. ✓
 
 ## Actualizar após mudanças
 
+**Opção simples (sem Terminal):** no GitHub, abre o repositório `bulbous`, clica **"Add file"** → **"Upload files"**, arrasta os ficheiros novos (com o mesmo nome dos antigos, ex: `game.js`) e clica **"Commit changes"**. Isto substitui o ficheiro antigo automaticamente.
+
+**Opção com Terminal:**
 ```bash
 git add .
 git commit -m "descrição"
 git push
 ```
-Render faz redeploy automaticamente.
+
+Nos dois casos, o Railway deteta o novo commit e faz redeploy automaticamente (demora ~1 min).
 
 ---
 

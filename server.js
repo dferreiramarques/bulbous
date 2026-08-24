@@ -35,15 +35,20 @@ const MIME = {
 
 // ══════════════════════════════════════════════════════════════════════════════
 // LOBBY DEFINITIONS  (permanent, created at startup)
-// 2 × 4-player | 2 × 2-player | 1 solo (4p rules, 3 bots)
+// 2 × 2 jogadores | 2 × 4 jogadores | 2 × equipas (2+2) | 2 × contra IA (1v1, 1v3)
 // ══════════════════════════════════════════════════════════════════════════════
 const LOBBY_DEFS = [
-  { id: 'table-4p-1', name: 'Mesa 4J — 1', mode: '4p', max: 4, solo: false },
-  { id: 'table-4p-2', name: 'Mesa 4J — 2', mode: '4p', max: 4, solo: false },
-  { id: 'table-2p-1', name: 'Mesa 2J — 1', mode: '2p', max: 2, solo: false },
-  { id: 'table-2p-2', name: 'Mesa 2J — 2', mode: '2p', max: 2, solo: false },
-  { id: 'table-solo', name: 'Solo vs Bots', mode: '4p', max: 1, solo: true  },
+  { id: 'table-2p-1',   name: 'Mesa 2 Jogadores — 1',   mode: '2p',  max: 2, solo: false },
+  { id: 'table-2p-2',   name: 'Mesa 2 Jogadores — 2',   mode: '2p',  max: 2, solo: false },
+  { id: 'table-4p-1',   name: 'Mesa 4 Jogadores — 1',   mode: '4p',  max: 4, solo: false },
+  { id: 'table-4p-2',   name: 'Mesa 4 Jogadores — 2',   mode: '4p',  max: 4, solo: false },
+  { id: 'table-2v2-1',  name: 'Mesa Equipas (2+2) — 1', mode: '2v2', max: 4, solo: false },
+  { id: 'table-2v2-2',  name: 'Mesa Equipas (2+2) — 2', mode: '2v2', max: 4, solo: false },
+  { id: 'table-ai-1v1', name: 'Contra a IA — 1 vs 1',   mode: '2p',  max: 1, solo: true, botCount: 1 },
+  { id: 'table-ai-1v3', name: 'Contra a IA — 1 vs 3',   mode: '4p',  max: 1, solo: true, botCount: 3 },
 ];
+
+const BOT_NAME_POOL = ['Bot Alfa', 'Bot Beta', 'Bot Gama', 'Bot Delta', 'Bot Épsilon'];
 
 const lobbies = {};   // id → lobbyObj
 const wsState = new WeakMap();   // ws → { lobbyId, seat, token }
@@ -56,6 +61,7 @@ function makeLobby(def) {
     mode:        def.mode,
     maxHumans:   def.max,
     solo:        def.solo,
+    botCount:    def.botCount || 0,
     players:     Array(def.max).fill(null),   // ws per seat
     names:       Array(def.max).fill(''),
     tokens:      Array(def.max).fill(null),
@@ -82,6 +88,7 @@ function lobbyInfo(lobby) {
     mode:      lobby.mode,
     maxHumans: lobby.maxHumans,
     solo:      lobby.solo,
+    botCount:  lobby.botCount,
     seated:    lobby.names.filter(Boolean),
     inGame:    !!lobby.game,
   };
@@ -266,15 +273,15 @@ function handleStart(lobby) {
   const seated = lobby.players.map((ws, i) => ws ? i : -1).filter(i => i !== -1);
 
   if (lobby.solo) {
-    // 1 human + 3 bots
+    // 1 human + N bots (N = lobby.botCount — 1 for a 1v1 table, 3 for 1v3)
     const humanSeat  = seated[0];
     const humanName  = lobby.names[humanSeat];
-    const botNames   = ['Bot Alfa', 'Bot Beta', 'Bot Gama'];
+    const botNames   = BOT_NAME_POOL.slice(0, lobby.botCount);
     const allPlayers = [
       { name: humanName, isBot: false },
       ...botNames.map(n => ({ name: n, isBot: true })),
     ];
-    lobby.game = newGame(allPlayers, '4p');
+    lobby.game = newGame(allPlayers, lobby.mode);
     // Seat 0 = human (index 0 in game), bots fill remainder
     broadcastGame(lobby);
     scheduleBots(lobby);

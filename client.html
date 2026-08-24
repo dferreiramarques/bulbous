@@ -215,6 +215,11 @@ input  { font: inherit; }
   background: var(--yellow); color: #000; font-size: .55rem; font-weight: 700;
   padding: 1px 4px; border-radius: 3px;
 }
+.seq-badge {
+  position: absolute; top: 16px; right: -8px; z-index: 5;
+  background: var(--accent); color: #000; font-size: .62rem; font-weight: 700;
+  padding: 2px 5px; border-radius: 999px; min-width: 1.1em; text-align: center;
+}
 
 /* Baelfungious card */
 .baelf-card {
@@ -350,6 +355,19 @@ input  { font: inherit; }
 .score-table th { color: var(--muted); font-weight: 600; font-size: .75rem; }
 .score-table td:first-child, .score-table th:first-child { text-align: left; }
 .score-table .winner-row td { color: var(--yellow); font-weight: 700; }
+.team-result {
+  display: flex; gap: 10px; margin-bottom: 14px;
+}
+.team-result .team-box {
+  flex: 1; text-align: center; padding: 10px 8px; border-radius: 8px;
+  border: 2px solid var(--border); background: #ffffff08;
+}
+.team-result .team-box.winner {
+  border-color: var(--yellow); background: #f4c43018;
+}
+.team-result .team-name { font-size: .82rem; color: var(--muted); font-weight: 600; }
+.team-result .team-total { font-size: 1.6rem; font-weight: 800; }
+.team-result .team-box.winner .team-total { color: var(--yellow); }
 .go-actions { display: flex; gap: 10px; }
 
 /* ═══════════════════════════════════════════════════════
@@ -756,6 +774,7 @@ input  { font: inherit; }
 <div id="gameover-overlay" class="overlay">
   <div class="gameover-box">
     <div class="gameover-title">🏆 Fim de Jogo</div>
+    <div id="team-result" class="team-result" style="display:none"></div>
     <table class="score-table">
       <thead>
         <tr>
@@ -796,6 +815,7 @@ let _prevHandSize = 0;
 let _mode       = '';     // ''|'bet'|'swap'
 let _selCards   = [];     // card ids selected
 let _selBaelf   = null;   // {baelfIdx?} or {playerIdx,slotIdx}
+let _seqOrder   = [];     // CHOOSE_SEQUENCE: [{playerIdx,slotIdx}] chosen so far, in click order
 let _tbCard     = null;   // tiebreak selected card id
 let _tieInt     = null;
 let _revealKey  = '';
@@ -910,7 +930,10 @@ function renderLobbyList() {
     const info = ce('div', 'table-info');
     const strong = ce('strong', null, lb.name);
     const small  = ce('small',  null,
-      lb.solo ? '🤖 Solo' : lb.mode === '4p' ? '👥 4 Jogadores' : '👤 2 Jogadores');
+      lb.solo ? `🤖 Contra IA (1 vs ${lb.botCount})`
+      : lb.mode === '2v2' ? '⚔️ Equipas 2+2'
+      : lb.mode === '4p'  ? '👥 4 Jogadores'
+      : '👤 2 Jogadores');
     info.append(strong, small);
 
     const players = ce('div', 'table-players', `${lb.seated.length}/${lb.maxHumans}`);
@@ -957,7 +980,7 @@ function renderWaiting(msg) {
     el('wait-hint').textContent = `Aguarda mais jogadores (${seated}/${lb.maxHumans}).`;
     el('btn-start').disabled = true;
   } else {
-    el('wait-hint').textContent = mySolo ? 'Mesa solo — joga contra 3 bots.' : 'Mesa completa!';
+    el('wait-hint').textContent = mySolo ? `Mesa solo — joga contra ${lb.botCount} bot${lb.botCount !== 1 ? 's' : ''}.` : 'Mesa completa!';
     el('btn-start').disabled = false;
   }
 }
@@ -1103,7 +1126,7 @@ function renderGame(st) {
   badge.style.background  = COLOR_DIM[me.color] || '#222';
 
   if (st.phase !== _prevPhase) {
-    _mode = ''; _selCards = []; _selBaelf = null;
+    _mode = ''; _selCards = []; _selBaelf = null; _seqOrder = [];
     if (st.phase === 'TIE_BREAK') { _tbCard = null; clearInterval(_tieInt); _tieInt = null; }
     _prevPhase = st.phase;
   }
@@ -1111,7 +1134,7 @@ function renderGame(st) {
   // Header
   const phaseLabels = {
     CHOOSE_BAELFUNGIOUS: 'Escolher Baelfungious',
-    CHOOSE_TARGET:       'Escolher Alvo',
+    CHOOSE_SEQUENCE:     'Declarar Sequência',
     PLAYER_ACTIONS:      'BULBOUS',
     TIE_BREAK:           '⚔️ Desempate',
     GAME_OVER:           'Fim de Jogo',
@@ -1235,7 +1258,10 @@ function renderCentre(st) {
   const area = el('centre-area');
   area.innerHTML = '';
   const t = st.trick;
-  const isGovPick = st.phase === 'CHOOSE_TARGET' && st.myIdx === st.governorIdx;
+  const isGovSeq = st.phase === 'CHOOSE_SEQUENCE' && st.myIdx === st.governorIdx;
+  // While declaring: show the order I'm building. Once declared: show the
+  // fixed order everyone agreed on (trickQueue), visible to all players.
+  const seqSource = (st.trickQueue && st.trickQueue.length) ? st.trickQueue : (isGovSeq ? _seqOrder : null);
 
   for (let pi = 0; pi < st.players.length; pi++) {
     const p = st.players[pi];
@@ -1248,15 +1274,22 @@ function renderCentre(st) {
       const ownerLbl = ce('div','owner-label', p.name);
       slot.appendChild(ownerLbl);
 
-      // Governor target marker
-      if (t && t.targetPlayerIdx === pi && t.targetSlotIdx === si) {
+      const isTarget = t && t.targetPlayerIdx === pi && t.targetSlotIdx === si;
+
+      // Governor target marker (this trick, right now)
+      if (isTarget) {
         const gm = ce('div','gov-marker','👑');
         slot.appendChild(gm);
       }
 
-      const isTarget = t && t.targetPlayerIdx === pi && t.targetSlotIdx === si;
-      const isSelectable = isGovPick && !isTarget;
-      const isSel = _selBaelf && _selBaelf.playerIdx === pi && _selBaelf.slotIdx === si;
+      // Declared-sequence position badge — 1ª/2ª/3ª/4ª
+      if (seqSource) {
+        const pos = seqSource.findIndex(o => o.playerIdx === pi && o.slotIdx === si);
+        if (pos !== -1) slot.appendChild(ce('div', 'seq-badge', (pos + 1) + 'ª'));
+      }
+
+      const isSelectable = isGovSeq;
+      const isSel = _seqOrder.some(o => o.playerIdx === pi && o.slotIdx === si);
 
       const card = mkBaelf(baelf, {
         clickable: isSelectable,
@@ -1266,8 +1299,12 @@ function renderCentre(st) {
 
       if (isSelectable) {
         card.onclick = () => {
-          send({ type:'CHOOSE_TARGET', targetPlayerIdx:pi, targetSlotIdx:si });
-          _selBaelf = null;
+          const idx = _seqOrder.findIndex(o => o.playerIdx === pi && o.slotIdx === si);
+          if (idx !== -1) _seqOrder.splice(idx, 1);       // click again to undo
+          else _seqOrder.push({ playerIdx: pi, slotIdx: si });
+          playClick();
+          renderCentre(st);
+          renderActionBar(st);
         };
       }
 
@@ -1352,11 +1389,29 @@ function renderActionBar(st) {
     return;
   }
 
-  // ── CHOOSE_TARGET ────────────────────────────────────────
-  if (st.phase === 'CHOOSE_TARGET') {
-    el('my-status').textContent = st.myIdx === st.governorIdx
-      ? '👑 És o Governante — clica no alvo no centro'
-      : 'Aguarda o Governante escolher…';
+  // ── CHOOSE_SEQUENCE ────────────────────────────────────────
+  if (st.phase === 'CHOOSE_SEQUENCE') {
+    const total = st.players.reduce((n, p) => n + p.activeSlots.filter(s => s !== null).length, 0);
+
+    if (st.myIdx !== st.governorIdx) {
+      el('my-status').textContent = '👑 Aguarda o Governante declarar a ordem da ronda…';
+      return;
+    }
+
+    el('my-status').textContent = _seqOrder.length < total
+      ? `👑 És o Governante — clica as ${total} Baelfungious no centro, pela ordem em que serão disputadas (${_seqOrder.length}/${total})`
+      : '👑 Ordem completa — confirma ou clica outra vez numa carta para corrigir';
+
+    const confirm = mkBtn(`Confirmar Sequência (${_seqOrder.length}/${total})`, 'btn-confirm', () => {
+      if (_seqOrder.length !== total) { toast(`Escolhe a posição das ${total} Baelfungious`); return; }
+      send({ type: 'CHOOSE_SEQUENCE', order: _seqOrder.map(o => ({ ...o })) });
+      _seqOrder = [];
+    });
+    confirm.disabled = _seqOrder.length !== total;
+    const reset = mkBtn('Recomeçar', 'btn-cancel', () => {
+      _seqOrder = []; renderCentre(st); renderActionBar(st);
+    });
+    bar.append(confirm, reset);
     return;
   }
 
@@ -1660,9 +1715,28 @@ el('btn-tb-pass').onclick = () => {
 };
 
 // ── Game Over ─────────────────────────────────────────────────
+const TEAM_LABEL = { circle: '⭕ Equipa Círculo', triangle: '▲ Equipa Triângulo' };
+
 function handleGameOver(st) {
   if (st.phase !== 'GAME_OVER' || !st.finalScores) return;
   el('gameover-overlay').classList.add('show');
+
+  const teamDiv = el('team-result');
+  if (st.mode === '2v2' && st.teamResult) {
+    teamDiv.style.display = '';
+    teamDiv.innerHTML = '';
+    for (const team of Object.keys(st.teamResult.totals)) {
+      const isWinner = st.teamResult.winners.includes(team);
+      const box = ce('div', 'team-box' + (isWinner ? ' winner' : ''));
+      box.append(
+        ce('div', 'team-name', (isWinner ? '🏆 ' : '') + (TEAM_LABEL[team] || team)),
+        ce('div', 'team-total', String(st.teamResult.totals[team])),
+      );
+      teamDiv.appendChild(box);
+    }
+  } else {
+    teamDiv.style.display = 'none';
+  }
 
   const tbody  = el('score-tbody');
   tbody.innerHTML = '';

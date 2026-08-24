@@ -58,12 +58,16 @@ function makeBaelfs(colors, ownerIdx) {
 // NEW GAME
 // ══════════════════════════════════════════════════════════════════════════════
 // lobbyPlayers : [{ name: string, isBot: boolean }]
-// mode         : '4p' | '2p'
-//   '4p' → 4 players (or solo: 1 human + 3 bots using '4p' rules)
-//   '2p' → 2 players, each gets 8 baelfungious, 9-card hand
+// mode         : '4p' | '2p' | '2v2'
+//   '4p'  → 4 players, individual (or solo: 1 human + bots using '4p' rules)
+//   '2p'  → 2 players, each gets 8 baelfungious, 9-card hand
+//   '2v2' → 4 players, fixed teams by symbol (seats 0&2 vs 1&3 — already
+//           alternating in turn order). Scoring stays individual per player;
+//           only the win condition sums each team's two totals (see VI.4).
 function newGame(lobbyPlayers, mode) {
   const is2p      = mode === '2p';
-  const n         = lobbyPlayers.length;  // 4 for 4p/solo, 2 for 2p
+  const is2v2     = mode === '2v2';
+  const n         = lobbyPlayers.length;  // 4 for 4p/solo/2v2, 2 for 2p
   const handLimit = is2p ? 9 : 7;
   const numSlots  = is2p ? 2 : 1;        // active-baelf slots per player in centre
 
@@ -75,6 +79,18 @@ function newGame(lobbyPlayers, mode) {
     // Randomly give each player a symbol; derive a representative colour
     const syms  = shuffle(['triangle', 'circle']);
     colorAssign = syms.map(s => s === 'triangle' ? 'red' : 'blue');
+  } else if (is2v2) {
+    // Fixed teams by seat parity (0&2 vs 1&3) — already alternating turn
+    // order, matching the "sentem-se intercalados" rule. Which parity is
+    // Círculo vs Triângulo, and which of its 2 colours each seat gets, is random.
+    const circleIsEvenSeat = Math.random() < 0.5;
+    const circleColors     = shuffle(['blue', 'green']);
+    const triangleColors   = shuffle(['red', 'yellow']);
+    colorAssign = [];
+    for (let i = 0; i < n; i++) {
+      const onCircle = ((i % 2 === 0) === circleIsEvenSeat);
+      colorAssign.push(onCircle ? circleColors.shift() : triangleColors.shift());
+    }
   } else {
     colorAssign = shuffle([...COLORS]).slice(0, n);
   }
@@ -93,9 +109,12 @@ function newGame(lobbyPlayers, mode) {
       isBot:            !!lp.isBot,
       color,
       symbol,
+      // Team = symbol in 2v2 (Círculo team plays blue/green, Triângulo team
+      // plays red/yellow) — null in every other mode.
+      team:             is2v2 ? symbol : null,
       hand:             deck.splice(0, handLimit),
       handLimit,
-      baelfungious:     makeBaelfs(bcolors, i), // 4 for 4p, 8 for 2p
+      baelfungious:     makeBaelfs(bcolors, i), // 4 for 4p/2v2, 8 for 2p
       // activeSlots[si] = index into baelfungious[], null if slot not yet filled
       activeSlots:      Array(numSlots).fill(null),
       endgameTriggered: false,
@@ -118,11 +137,13 @@ function newGame(lobbyPlayers, mode) {
     turnGen:     0,        // incremented each round; lets server cancel stale bot timers
     replaceNeeded,         // [{playerIdx, slotIdx}] — who still needs to pick
     trick:       null,
-    trickNum:    0,        // 0..3 within a round
+    trickNum:    0,        // 0..3 within a round — also indexes trickQueue
+    trickQueue:  null,     // [{playerIdx, slotIdx}] × 4 — full round order, declared upfront
     contestedThisRound:    [],  // [{playerIdx, slotIdx}] already contested this round
     anyCompletedThisRound: false,
     lastTrickResult:       null,
     finalScores:           null,
+    teamResult:            null,  // { totals: {circle,triangle}, winners: [...] } — 2v2 only
   };
 }
 
@@ -163,12 +184,6 @@ function getActives(g) {
     }
   }
   return out;
-}
-
-function getUncontested(g) {
-  return getActives(g).filter(a =>
-    !g.contestedThisRound.some(c => c.playerIdx === a.playerIdx && c.slotIdx === a.slotIdx)
-  );
 }
 
 // Card playability: colour OR symbol must match the target baelfungious
@@ -239,24 +254,49 @@ function chooseBaelf(g, playerIdx, baelfIdx) {
     g.contestedThisRound    = [];
     g.anyCompletedThisRound = false;
     g.trickNum              = 0;
+    g.trickQueue             = null;
     g.trick                 = null;
-    g.phase                 = 'CHOOSE_TARGET';
+    g.phase                 = 'CHOOSE_SEQUENCE';
   }
 
   return { ok: true };
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// ACTION: CHOOSE_TARGET
-// Governor (Governante) picks which active baelfungious to contest this trick.
+// ACTION: CHOOSE_SEQUENCE
+// Governor (Governante) declares, in one go, the full order in which the 4
+// active Baelfungious will be contested this round — before any card is
+// played. The order is fixed for the whole round once declared.
 // ══════════════════════════════════════════════════════════════════════════════
-function chooseTarget(g, playerIdx, targetPlayerIdx, targetSlotIdx) {
-  if (g.phase !== 'CHOOSE_TARGET') return { error: 'Fase incorreta' };
-  if (playerIdx !== g.governorIdx) return { error: 'Não és o Governante da Ronda' };
+function chooseSequence(g, playerIdx, order) {
+  if (g.phase !== 'CHOOSE_SEQUENCE') return { error: 'Fase incorreta' };
+  if (playerIdx !== g.governorIdx)   return { error: 'Não és o Governante da Ronda' };
 
-  const valid = getUncontested(g);
-  const found = valid.find(u => u.playerIdx === targetPlayerIdx && u.slotIdx === targetSlotIdx);
-  if (!found) return { error: 'Alvo inválido ou já contestado nesta ronda' };
+  const actives = getActives(g); // nothing contested yet at round start
+  if (!Array.isArray(order) || order.length !== actives.length)
+    return { error: `Tens de declarar a ordem das ${actives.length} Baelfungious ativas` };
+
+  const seen = new Set();
+  for (const o of order) {
+    if (!o || typeof o.playerIdx !== 'number' || typeof o.slotIdx !== 'number')
+      return { error: 'Sequência inválida' };
+    const key = `${o.playerIdx}-${o.slotIdx}`;
+    if (seen.has(key)) return { error: 'Cada Baelfungious só pode aparecer uma vez na sequência' };
+    seen.add(key);
+    if (!actives.find(a => a.playerIdx === o.playerIdx && a.slotIdx === o.slotIdx))
+      return { error: 'Alvo inválido na sequência' };
+  }
+
+  g.trickQueue = order.map(o => ({ playerIdx: o.playerIdx, slotIdx: o.slotIdx }));
+  startTrickFromQueue(g);
+  return { ok: true };
+}
+
+// Builds g.trick from g.trickQueue[g.trickNum] and moves to PLAYER_ACTIONS.
+// Used both right after the sequence is declared and after each trick
+// resolves, for as long as tricks remain in the declared order.
+function startTrickFromQueue(g) {
+  const { playerIdx: targetPlayerIdx, slotIdx: targetSlotIdx } = g.trickQueue[g.trickNum];
 
   // Action order: governor first, then clockwise
   const order = Array.from({ length: g.n }, (_, i) => (g.governorIdx + i) % g.n);
@@ -277,7 +317,6 @@ function chooseTarget(g, playerIdx, targetPlayerIdx, targetSlotIdx) {
   };
 
   g.phase = 'PLAYER_ACTIONS';
-  return { ok: true };
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -550,11 +589,17 @@ function finishTrick(g) {
   g.contestedThisRound.push({ playerIdx: g.trick.targetPlayerIdx, slotIdx: g.trick.targetSlotIdx });
   g.trickNum++;
 
-  if (g.trickNum >= TRICKS_PER_ROUND) {
+  // Normally trickQueue.length === TRICKS_PER_ROUND (4), but a starved
+  // 2-player slot (see endRound) can leave fewer Baelfungious active for a
+  // round — always trust the actual declared sequence length, not the
+  // usual constant, so we never index past the end of trickQueue.
+  if (g.trickNum >= g.trickQueue.length) {
     endRound(g);
   } else {
+    // Next trick in the sequence declared at the start of this round —
+    // no new choice, the order was fixed before the round began.
     g.trick = null;
-    g.phase = 'CHOOSE_TARGET';
+    startTrickFromQueue(g);
   }
 }
 
@@ -562,8 +607,9 @@ function finishTrick(g) {
 // END OF ROUND
 // ══════════════════════════════════════════════════════════════════════════════
 function endRound(g) {
-  g.trick    = null;
-  g.trickNum = 0;
+  g.trick      = null;
+  g.trickNum   = 0;
+  g.trickQueue = null;
 
   // 1. Draw cards if at least one Baelfungious completed this round
   if (g.anyCompletedThisRound) {
@@ -576,6 +622,7 @@ function endRound(g) {
   // 2. Check endgame (triggered during chooseBaelf when player placed their last)
   if (g.endgameFired) {
     g.finalScores = calcFinalScore(g);
+    g.teamResult  = g.mode === '2v2' ? calcTeamResult(g, g.finalScores) : null;
     g.phase       = 'GAME_OVER';
     return;
   }
@@ -587,25 +634,44 @@ function endRound(g) {
   g.anyCompletedThisRound = false;
   g.turnGen++;
 
-  // 4. Find slots that need replacement (active baelf completed this round)
+  // 4. Find slots that need replacement (active baelf completed this round).
+  // Processed per player (not per slot in isolation): in 2-player mode a
+  // player can have both of their 2 active slots complete in the same round,
+  // and the reserve of un-activated Baelfungious is shared between them — so
+  // slot A and slot B must not each independently "see" the same last
+  // spare card as available (that double-counts a resource that can only
+  // go to one of them).
   const replaceNeeded = [];
   for (let pi = 0; pi < g.n; pi++) {
     const p = g.players[pi];
+    const slotsToFill = [];
     for (let si = 0; si < g.numSlots; si++) {
       const bi = p.activeSlots[si];
       if (bi === null || !p.baelfungious[bi].complete) continue;
+      p.activeSlots[si] = null; // clear now; which card refills it is decided below
+      slotsToFill.push(si);
+    }
+    if (slotsToFill.length === 0) continue;
 
-      // Clear the slot
-      p.activeSlots[si] = null;
+    const activeSet = new Set(p.activeSlots.filter(s => s !== null));
+    const available  = p.baelfungious.filter((b, i) => !b.complete && !activeSet.has(i));
 
-      // Does this player have anything available to replace it?
-      const activeSet = new Set(p.activeSlots.filter(s => s !== null));
-      const available = p.baelfungious.filter((b, i) => !b.complete && !activeSet.has(i));
-
+    for (const si of slotsToFill) {
       if (available.length > 0) {
         replaceNeeded.push({ playerIdx: pi, slotIdx: si });
+        available.pop(); // reserve one spare for this slot so a sibling slot can't also claim it
       }
-      // If no available → endgame should already have fired; slot stays null
+      // else: nothing left for this slot — it stays permanently empty.
+    }
+
+    // If every slot we just tried to fill came up empty (zero pending
+    // entries pushed for this player), chooseBaelf will never run for them
+    // again this game, so the endgame check that normally lives there must
+    // fire here instead.
+    const pendingForP = replaceNeeded.filter(r => r.playerIdx === pi).length;
+    if (pendingForP === 0 && !p.endgameTriggered) {
+      p.endgameTriggered = true;
+      g.endgameFired     = true;
     }
   }
 
@@ -614,7 +680,7 @@ function endRound(g) {
     g.phase         = 'CHOOSE_BAELFUNGIOUS';
   } else {
     g.replaceNeeded = [];
-    g.phase         = 'CHOOSE_TARGET';
+    g.phase         = 'CHOOSE_SEQUENCE';
   }
 }
 
@@ -630,7 +696,7 @@ function calcFinalScore(g) {
     majority: 0,
     collection: 0,
     total:    0,
-    controlled: { colors: new Set(), symbols: new Set() },
+    controlled: { colors: new Set(), types: new Set() },
   }));
 
   const allBaelfs = g.players.flatMap(p => p.baelfungious);
@@ -656,24 +722,39 @@ function calcFinalScore(g) {
       for (const li of leaders) s[li].majority += 1; // tied majority
     }
 
-    // Track for collection bonus
+    // Track for collection bonus. b.slots (1-4) is the specimen type:
+    // 1=Juvenil, 2=Adulto, 3=Bailiff, 4=Líder.
     for (const li of leaders) {
       s[li].controlled.colors.add(b.color);
-      s[li].controlled.symbols.add(b.symbol);
+      s[li].controlled.types.add(b.slots);
     }
   }
 
-  // 3. Collection bonuses
+  // 3. Collection bonuses (rulebook VI.3)
   for (const sc of s) {
-    if (sc.controlled.colors.size  >= 4) sc.collection += 5; // all 4 colours
-    if (sc.controlled.symbols.size >= 2) sc.collection += 5; // both symbols
+    if (sc.controlled.colors.size >= 4) sc.collection += 5;  // Todas as Cores
+    if (sc.controlled.types.size  >= 4) sc.collection += 10; // Todos os Espécimes (Líder, Bailiff, Adulto, Juvenil)
     sc.total = sc.bulbs + sc.majority + sc.collection;
     // Convert sets to arrays for JSON serialisation
-    sc.controlled.colors   = [...sc.controlled.colors];
-    sc.controlled.symbols  = [...sc.controlled.symbols];
+    sc.controlled.colors = [...sc.controlled.colors];
+    sc.controlled.types  = [...sc.controlled.types];
   }
 
   return s;
+}
+
+// Sum each team's individual totals (2v2 only). Pontuação continua sempre
+// individual — isto só decide qual equipa venceu (VI.4 do rulebook).
+function calcTeamResult(g, scores) {
+  const totals = {};
+  for (const sc of scores) {
+    const team = g.players[sc.idx].team;
+    totals[team] = (totals[team] || 0) + sc.total;
+  }
+  const teamNames = Object.keys(totals);
+  const maxTotal  = Math.max(...teamNames.map(t => totals[t]));
+  const winners   = teamNames.filter(t => totals[t] === maxTotal);
+  return { totals, winners }; // winners.length > 1 → vitória partilhada
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -714,6 +795,7 @@ function buildView(g, playerIdx) {
 
   return {
     myIdx:        playerIdx,
+    mode:         g.mode,
     phase:        g.phase,
     roundNum:     g.roundNum,
     governorIdx:  g.governorIdx,
@@ -723,6 +805,7 @@ function buildView(g, playerIdx) {
       name:             p.name,
       color:            p.color,
       symbol:           p.symbol,
+      team:             p.team,       // 'circle' | 'triangle' | null (2v2 only)
       isBot:            p.isBot,
       handSize:         p.hand.length,
       activeSlots:      p.activeSlots,
@@ -736,10 +819,13 @@ function buildView(g, playerIdx) {
     discardSize: g.discard.length,
 
     trick:              trickView,
+    trickQueue:         g.trickQueue,   // full declared order for this round, once set
+    trickNum:           g.trickNum,     // 0..3 — index of current trick within trickQueue
     replaceNeeded:      g.replaceNeeded || [],
     anyCompletedThisRound: g.anyCompletedThisRound,
     lastTrickResult:    g.lastTrickResult,
     finalScores:        g.finalScores,
+    teamResult:         g.teamResult,   // { totals, winners } — 2v2 only
   };
 }
 
@@ -763,13 +849,17 @@ function botChooseBaelf(g, playerIdx) {
   return available[0].i;
 }
 
-function botChooseTarget(g) {
-  const opts = getUncontested(g);
-  if (!opts.length) return null;
-  // Prefer targets with fewer slots (faster to complete = more danger)
-  opts.sort((a, b) => a.baelf.slots - b.baelf.slots);
-  const pick = opts[0];
-  return { targetPlayerIdx: pick.playerIdx, targetSlotIdx: pick.slotIdx };
+// Bot version of the Governor declaring the round's full sequence upfront.
+// Same randomized aggressive/defensive/random spread as botChooseBaelf, but
+// applied to ordering rather than picking one target at a time.
+function botChooseSequence(g) {
+  let opts = getActives(g);
+  if (!opts.length) return [];
+  const r = Math.random();
+  if (r < 0.40) opts = [...opts].sort((a, b) => a.baelf.slots - b.baelf.slots);      // aggressive first
+  else if (r < 0.70) opts = [...opts].sort((a, b) => b.baelf.slots - a.baelf.slots); // defensive first
+  else opts = shuffle(opts);                                                        // random order
+  return opts.map(o => ({ playerIdx: o.playerIdx, slotIdx: o.slotIdx }));
 }
 
 function botAct(g, playerIdx) {
@@ -841,9 +931,9 @@ function getBotAction(g) {
     }
   }
 
-  if (g.phase === 'CHOOSE_TARGET' && g.players[g.governorIdx].isBot) {
-    const t = botChooseTarget(g);
-    if (t) return { playerIdx: g.governorIdx, msg: { type: 'CHOOSE_TARGET', ...t } };
+  if (g.phase === 'CHOOSE_SEQUENCE' && g.players[g.governorIdx].isBot) {
+    const order = botChooseSequence(g);
+    if (order.length) return { playerIdx: g.governorIdx, msg: { type: 'CHOOSE_SEQUENCE', order } };
   }
 
   if (g.phase === 'PLAYER_ACTIONS' && g.trick) {
@@ -873,8 +963,8 @@ function getBotAction(g) {
 // ══════════════════════════════════════════════════════════════════════════════
 function handleAction(g, playerIdx, msg) {
   switch (msg.type) {
-    case 'CHOOSE_BAELF':   return chooseBaelf(g, playerIdx, msg.baelfIdx);
-    case 'CHOOSE_TARGET':  return chooseTarget(g, playerIdx, msg.targetPlayerIdx, msg.targetSlotIdx);
+    case 'CHOOSE_BAELF':     return chooseBaelf(g, playerIdx, msg.baelfIdx);
+    case 'CHOOSE_SEQUENCE':  return chooseSequence(g, playerIdx, msg.order);
     // Client and bots may send BET/SWAP/PASS directly (or wrapped as PLAYER_ACT)
     case 'PLAYER_ACT':
     case 'BET':

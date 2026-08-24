@@ -13,7 +13,7 @@ const {
 // CONFIG
 // ══════════════════════════════════════════════════════════════════════════════
 const PORT      = process.env.PORT || 3000;
-const GRACE_MS  = 45_000;   // reconnect window after disconnect
+const GRACE_MS  = 120_000;  // reconnect window after disconnect
 const BOT_MS    = 1_200;    // delay before bot acts (feels natural)
 const PING_MS   = 20_000;   // server→client ws ping interval
 
@@ -240,10 +240,10 @@ function handleLeave(ws) {
   if (!st || !st.lobbyId) return;
   const lobby = lobbies[st.lobbyId];
   if (!lobby) return;
-  hardLeave(lobby, st.seat);
+  hardLeave(lobby, st.seat, { timedOut: false });
 }
 
-function hardLeave(lobby, seat) {
+function hardLeave(lobby, seat, { timedOut = false } = {}) {
   clearTimeout(lobby.graceTimers[seat]);
   const name = lobby.names[seat];
 
@@ -256,7 +256,10 @@ function hardLeave(lobby, seat) {
   // If game running, abort it (player left permanently)
   if (lobby.game) {
     lobby.game = null;
-    lobby.players.forEach(p => p && send(p, { type: 'GAME_ABORTED', reason: `${name} saiu do jogo.` }));
+    const reason = timedOut
+      ? `Perdemos um jogador — ${name} não reconectou a tempo. O jogo foi encerrado.`
+      : `${name} saiu do jogo. O jogo foi encerrado.`;
+    lobby.players.forEach(p => p && send(p, { type: 'GAME_ABORTED', reason }));
   } else {
     lobby.players.forEach((p, i) => {
       if (p && i !== seat) send(p, { type: 'OPPONENT_LEFT', seat, name });
@@ -520,7 +523,7 @@ wss.on('connection', ws => {
     broadcastLobbyList();
 
     clearTimeout(lobby.graceTimers[seat]);
-    lobby.graceTimers[seat] = setTimeout(() => hardLeave(lobby, seat), GRACE_MS);
+    lobby.graceTimers[seat] = setTimeout(() => hardLeave(lobby, seat, { timedOut: true }), GRACE_MS);
   });
 
   ws.on('error', () => {});

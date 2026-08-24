@@ -766,14 +766,21 @@ input  { font: inherit; }
 <div id="tiebreak-overlay" class="overlay">
   <div class="tiebreak-box">
     <div class="tiebreak-title">⚔️ Empate — Desempate Opcional</div>
-    <p style="font-size:.8rem;color:var(--muted)">Podes jogar 1 carta da mesma cor da Baelfungious.</p>
-    <div id="tb-timer" style="font-size:.82rem;color:var(--muted)"></div>
-    <div id="tb-hand"></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn-action btn-confirm" id="btn-tb-play" disabled>Jogar Selecionada</button>
-      <button class="btn-action btn-pass"    id="btn-tb-pass">Passar</button>
+    <div id="tb-choice-view">
+      <p style="font-size:.8rem;color:var(--muted)">Podes jogar 1 carta da mesma cor da Baelfungious.</p>
+      <div id="tb-timer" style="font-size:.82rem;color:var(--muted)"></div>
+      <div id="tb-hand"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-action btn-confirm" id="btn-tb-play" disabled>Jogar Selecionada</button>
+        <button class="btn-action btn-pass"    id="btn-tb-pass">Passar</button>
+      </div>
+      <div id="tb-waiting" style="font-size:.72rem;color:var(--muted);text-align:center"></div>
     </div>
-    <div id="tb-waiting" style="font-size:.72rem;color:var(--muted);text-align:center"></div>
+    <div id="tb-result-view" style="display:none">
+      <div id="tb-result-cards" style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-bottom:10px"></div>
+      <div id="tb-result-text" style="font-size:1.05rem;font-weight:700;text-align:center;margin-bottom:14px"></div>
+      <button class="btn-action btn-confirm" id="btn-tb-continue">Continuar</button>
+    </div>
   </div>
 </div>
 
@@ -797,6 +804,15 @@ input  { font: inherit; }
   </div>
 </div>
 
+<!-- ═══ OVERLAY: GAME ABORTED (jogador perdido) ═══════════════ -->
+<div id="aborted-overlay" class="overlay">
+  <div class="tiebreak-box">
+    <div class="tiebreak-title">⚠️ Jogo Encerrado</div>
+    <div id="aborted-reason" style="font-size:.9rem;text-align:center"></div>
+    <button class="btn-primary" id="btn-aborted-lobby">Voltar ao Lobby</button>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════════════════════════
 // CONSTANTS
@@ -811,7 +827,10 @@ const SCREENS   = ['screen-name','screen-lobby','screen-waiting','screen-game'];
 // ══════════════════════════════════════════════════════════════
 let ws          = null;
 let myName      = '';
-let myToken     = sessionStorage.getItem('bulb_token') || '';
+// localStorage (not sessionStorage): must survive the tab/app being fully
+// closed and reopened — that's exactly the case where a dropped connection
+// needs to reclaim its seat within the server's reconnect grace window.
+let myToken     = localStorage.getItem('bulb_token') || '';
 let myLobbyId   = '';
 let mySeat      = -1;
 let mySolo      = false;
@@ -823,9 +842,11 @@ let _mode       = '';     // ''|'bet'|'swap'
 let _selCards   = [];     // card ids selected
 let _selBaelf   = null;   // {baelfIdx?} or {playerIdx,slotIdx}
 let _seqOrder   = [];     // CHOOSE_SEQUENCE: [{playerIdx,slotIdx}] chosen so far, in click order
-let _tbCard     = null;   // tiebreak selected card id
-let _tieInt     = null;
-let _revealKey  = '';
+let _tbCard         = null;  // tiebreak selected card id
+let _tieInt         = null;
+let _revealKey      = '';
+let _tieResultKey   = '';    // dedup: which resolved tiebreak result we've already shown
+let _tieResultOpen  = false; // true while the result panel is up, waiting for "Continuar"
 
 // ══════════════════════════════════════════════════════════════
 // UTILS
@@ -880,7 +901,7 @@ function dispatch(msg) {
       break;
     case 'JOINED':
       mySeat = msg.seat; myToken = msg.token; myLobbyId = msg.lobbyId; mySolo = msg.solo;
-      sessionStorage.setItem('bulb_token', myToken);
+      localStorage.setItem('bulb_token', myToken);
       break;
     case 'LOBBY_STATE':
       renderWaiting(msg);
@@ -890,7 +911,7 @@ function dispatch(msg) {
       toast('Reconectado!');
       break;
     case 'RECONNECT_FAIL':
-      sessionStorage.removeItem('bulb_token');
+      localStorage.removeItem('bulb_token');
       myToken = ''; myName = ''; mySeat = -1; myLobbyId = '';
       closeOverlays();
       showScreen('screen-name');
@@ -899,9 +920,10 @@ function dispatch(msg) {
       renderGame(msg.state);
       break;
     case 'GAME_ABORTED':
-      toast(msg.reason || 'Jogo cancelado.', 5000);
-      _gs = null; closeOverlays();
-      send({ type:'REQUEST_STATE' });
+      _gs = null;
+      closeOverlays();
+      el('aborted-reason').textContent = msg.reason || 'Um jogador saiu — o jogo foi encerrado.';
+      el('aborted-overlay').classList.add('show');
       break;
     case 'OPPONENT_JOINED':
       toast(`${msg.name} entrou na mesa`);
@@ -911,9 +933,11 @@ function dispatch(msg) {
       toast('Um jogador saiu da mesa.');
       send({ type:'REQUEST_STATE' });
       break;
-    case 'OPPONENT_DISCONNECTED_GRACE':
-      toast(`${msg.name} desligou — 45s para reconectar…`, 5000);
+    case 'OPPONENT_DISCONNECTED_GRACE': {
+      const sec = Math.round((msg.graceMs || 120000) / 1000);
+      toast(`${msg.name} perdeu a ligação — ${sec}s para reconectar…`, 6000);
       break;
+    }
     case 'OPPONENT_RECONNECTED':
       toast(`${msg.name} voltou!`);
       break;
@@ -1579,8 +1603,10 @@ function handleOverlays(st) {
   handleGameOver(st);
 }
 function closeOverlays() {
-  ['reveal-overlay','tiebreak-overlay','gameover-overlay'].forEach(id => el(id).classList.remove('show'));
+  ['reveal-overlay','tiebreak-overlay','gameover-overlay','aborted-overlay'].forEach(id => el(id).classList.remove('show'));
   clearInterval(_tieInt);
+  _tieResultOpen = false;
+  _tieResultKey  = '';
 }
 
 // ── Reveal ────────────────────────────────────────────────────
@@ -1645,7 +1671,32 @@ el('btn-dismiss-reveal').onclick = () => el('reveal-overlay').classList.remove('
 // ── Tiebreak ──────────────────────────────────────────────────
 function handleTiebreak(st) {
   const ov = el('tiebreak-overlay');
-  if (st.phase !== 'TIE_BREAK') { ov.classList.remove('show'); clearInterval(_tieInt); return; }
+
+  if (st.phase !== 'TIE_BREAK') {
+    // The result panel, once shown, stays up regardless of further state
+    // updates (bots acting in the next trick, etc.) until "Continuar" is
+    // clicked — don't let a routine re-render close or rebuild it under us.
+    if (_tieResultOpen) return;
+
+    const lr = st.lastTrickResult;
+    if (lr && lr.tied && lr.tieWinner !== undefined) {
+      const key = `${lr.trickTargetPlayerIdx}-${lr.trickTargetSlotIdx}-${st.roundNum}-tie`;
+      if (_tieResultKey !== key) {
+        _tieResultKey  = key;
+        showTieResult(st, lr);
+        return;
+      }
+    }
+
+    ov.classList.remove('show');
+    clearInterval(_tieInt);
+    return;
+  }
+
+  // A live TIE_BREAK phase always takes priority over any stale result view.
+  _tieResultOpen = false;
+  el('tb-choice-view').style.display = '';
+  el('tb-result-view').style.display = 'none';
 
   const t = st.trick;
   if (!t) return;
@@ -1714,6 +1765,55 @@ function renderTbHand(st) {
   el('btn-tb-play').disabled = _tbCard === null;
 }
 
+// Shows the outcome of a just-resolved tiebreak (won / lost / tied again)
+// and freezes the overlay open until the player clicks "Continuar".
+function showTieResult(st, lr) {
+  _tieResultOpen = true;
+  clearInterval(_tieInt);
+  el('tb-choice-view').style.display = 'none';
+  el('tb-result-view').style.display = '';
+  el('tiebreak-overlay').classList.add('show');
+
+  // Show what each tied player did in the tiebreak, for context.
+  const cardsEl = el('tb-result-cards');
+  cardsEl.innerHTML = '';
+  for (const i of lr.tiedPlayers) {
+    const wrap = ce('div', null);
+    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:3px';
+    const nameEl = ce('div', null, st.players[i].name + (i === st.myIdx ? ' (tu)' : ''));
+    nameEl.style.cssText = `font-size:.7rem;color:${COLOR_HEX[st.players[i].color] || 'var(--muted)'}`;
+    wrap.appendChild(nameEl);
+    const tbCard = lr.tieBreakCards && lr.tieBreakCards[i];
+    if (tbCard) {
+      const cd = mkCharm(tbCard);
+      cd.style.cssText = 'transform:scale(.72);transform-origin:top center;flex-shrink:0';
+      wrap.appendChild(cd);
+    } else {
+      const passEl = ce('span', null, '⏭ Passou');
+      passEl.style.cssText = 'font-size:.72rem;color:var(--muted)';
+      wrap.appendChild(passEl);
+    }
+    cardsEl.appendChild(wrap);
+  }
+
+  const resEl = el('tb-result-text');
+  if (lr.tieWinner === st.myIdx) {
+    resEl.textContent = '🏆 Ganhaste o desempate!';
+    resEl.style.color = COLOR_HEX[st.players[st.myIdx].color] || 'var(--yellow)';
+  } else if (lr.tieWinner !== null) {
+    resEl.textContent = `${st.players[lr.tieWinner].name} ganhou o desempate.`;
+    resEl.style.color = COLOR_HEX[st.players[lr.tieWinner].color] || '#fff';
+  } else {
+    resEl.textContent = 'Empate outra vez — ninguém fica com o bolbo.';
+    resEl.style.color = 'var(--muted)';
+  }
+}
+
+el('btn-tb-continue').onclick = () => {
+  _tieResultOpen = false;
+  el('tiebreak-overlay').classList.remove('show');
+};
+
 el('btn-tb-play').onclick = () => {
   send({ type:'TIE_BREAK', cardId: _tbCard });
   clearInterval(_tieInt);
@@ -1774,6 +1874,10 @@ el('btn-go-lobby').onclick = () => {
   el('gameover-overlay').classList.remove('show');
   leaveGame();
 };
+el('btn-aborted-lobby').onclick = () => {
+  el('aborted-overlay').classList.remove('show');
+  leaveGame();
+};
 
 // ══════════════════════════════════════════════════════════════
 // NAVIGATION BUTTONS
@@ -1799,7 +1903,7 @@ el('btn-leave').onclick       = () => leaveGame();
 function leaveGame() {
   send({ type:'LEAVE_LOBBY' });
   myLobbyId=''; mySeat=-1; _gs=null;
-  sessionStorage.removeItem('bulb_token');
+  localStorage.removeItem('bulb_token');
   myToken = '';
   closeOverlays();
   showScreen('screen-lobby');

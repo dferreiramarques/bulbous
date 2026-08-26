@@ -138,10 +138,19 @@ input  { font: inherit; }
 /* ═══════════════════════════════════════════════════════
    SCREEN: LOBBY
 ═══════════════════════════════════════════════════════ */
-#screen-lobby { background: var(--bg); }
+/* Lobby fica dentro de um cartão centrado no ecrã (mesmo padrão do
+   .waiting-card abaixo e do .card-box do Capivaras), em vez de uma
+   barra + lista a ocupar o ecrã todo de lado a lado. */
+#screen-lobby { align-items: center; justify-content: center; background: var(--bg); padding: 24px; }
+.lobby-container {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+  width: min(560px, 100%); max-height: 86vh;
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: var(--shadow-card-hover);
+}
 .lobby-header {
   padding: 18px 22px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 14px;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px;
 }
 .lobby-header h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; flex: 1; color: var(--accent); }
 .lobby-header span { color: var(--muted); font-size: .92rem; }
@@ -773,14 +782,16 @@ input  { font: inherit; }
 
 <!-- ═══ LOBBY ═══════════════════════════════════════════════ -->
 <div id="screen-lobby" class="screen">
-  <div class="lobby-header">
-    <h2>BULBOUS</h2>
-    <span id="lby-name"></span>
-    <button class="btn-ghost" id="btn-rules-lobby">📖 Como Jogar?</button>
-    <button class="btn-ghost" id="btn-change-name">Mudar nome</button>
-  </div>
-  <div class="lobby-list" id="lobby-list">
-    <p style="color:var(--muted);text-align:center;margin-top:40px">A ligar…</p>
+  <div class="lobby-container">
+    <div class="lobby-header">
+      <h2>BULBOUS</h2>
+      <span id="lby-name"></span>
+      <button class="btn-ghost" id="btn-rules-lobby">📖 Como Jogar?</button>
+      <button class="btn-ghost" id="btn-change-name">Mudar nome</button>
+    </div>
+    <div class="lobby-list" id="lobby-list">
+      <p style="color:var(--muted);text-align:center;margin-top:40px">A ligar…</p>
+    </div>
   </div>
 </div>
 

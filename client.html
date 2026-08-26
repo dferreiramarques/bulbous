@@ -44,7 +44,7 @@
   --card-h:      123px;
   --baelf-w:     95px;
   --baelf-h:     165px;
-  --centre-baelf-w: 143px;
+  --centre-baelf-w: 128px;
   --my-baelf-w:  76px;
 
   /* design system bitnikgames */
@@ -195,8 +195,8 @@ input  { font: inherit; }
   justify-content: center;
 }
 .opponent-panel {
-  display: flex; flex-direction: column; gap: 4px; min-width: 155px;
-  background: var(--surface2); border-radius: var(--radius-sm); padding: 9px 11px;
+  display: flex; flex-direction: column; gap: 3px; min-width: 155px;
+  background: var(--surface2); border-radius: var(--radius-sm); padding: 7px 10px;
   border: 2px solid transparent; transition: border-color .2s; flex-shrink: 0;
 }
 .opponent-panel.governor { border-color: var(--yellow); }
@@ -230,10 +230,10 @@ input  { font: inherit; }
 /* Centre */
 #centre-area {
   flex: 1; display: flex; align-items: center; justify-content: center;
-  gap: 18px; padding: 12px 16px; overflow: hidden; flex-wrap: wrap;
+  gap: 18px; padding: 12px 16px; overflow-y: auto; flex-wrap: wrap; min-height: 0;
 }
 .active-baelf-slot {
-  display: flex; flex-direction: column; align-items: center; gap: 5px; position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 3px; position: relative;
 }
 .owner-label {
   font-size: .78rem; color: var(--muted); max-width: var(--baelf-w);

@@ -140,11 +140,13 @@ input  { font: inherit; }
 ═══════════════════════════════════════════════════════ */
 /* Lobby fica dentro de um cartão centrado no ecrã (mesmo padrão do
    .waiting-card abaixo e do .card-box do Capivaras), em vez de uma
-   barra + lista a ocupar o ecrã todo de lado a lado. */
-#screen-lobby { align-items: center; justify-content: center; background: var(--bg); padding: 24px; }
+   barra + lista a ocupar o ecrã todo de lado a lado. Encostado ao topo
+   (não centrado no eixo vertical) para dar à lista o máximo de altura
+   possível e evitar scroll interno com muitas mesas. */
+#screen-lobby { align-items: center; justify-content: flex-start; background: var(--bg); padding: 24px; }
 .lobby-container {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
-  width: min(560px, 100%); max-height: 86vh;
+  width: min(560px, 100%); max-height: calc(100vh - 48px);
   display: flex; flex-direction: column; overflow: hidden;
   box-shadow: var(--shadow-card-hover);
 }

@@ -291,17 +291,33 @@ input  { font: inherit; }
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover; object-position: center top; border-radius: var(--radius-sm);
 }
-/* Bottom overlay — fixed height 24px, holds slot dots + count */
-.baelf-overlay {
-  position: absolute; bottom: 0; left: 0; right: 0; height: 36px;
-  background: rgba(0,0,0,.82); backdrop-filter: blur(2px);
-  display: flex; flex-direction: row; align-items: center; justify-content: center;
-  gap: 4px; padding: 0 4px;
+/* Os anéis onde os bolbos entram já estão desenhados na própria arte de
+   cada carta (na cor da carta), nas mesmas posições em todas as cores —
+   só a foto muda. Em vez de uma barra preta por cima a repetir essa
+   informação, cada bolbo preenchido é um círculo colorido posicionado
+   exatamente sobre o anel correspondente (coordenadas medidas na arte,
+   ver SLOT_POS mais abaixo); um anel vazio não precisa de nada — já
+   aparece vazio na própria imagem. */
+.baelf-bulb {
+  position: absolute;
+  width: 15%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 5px currentColor, inset 0 0 3px rgba(0, 0, 0, 0.45);
 }
-.baelf-sym    { display: none; }
-.baelf-slots  { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; align-items: center; }
-.baelf-slot   { width: 9px; height: 9px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); flex-shrink: 0; }
-.baelf-count  { font-size: .55rem; opacity: .75; color: #fff; line-height: 1; white-space: nowrap; }
+
+.baelf-count-badge {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 9px;
+  line-height: 1.4;
+  padding: 1px 5px;
+  border-radius: var(--radius-pill);
+}
 
 /* Charm card */
 .charm-card {
@@ -1128,6 +1144,17 @@ function appendCharmFallback(div, c) {
   div.append(ce('div','charm-top', String(top)), midEl, ce('div','charm-bot', bot));
 }
 
+// Posição (% da carta) de cada anel de bolbo, por número de slots —
+// medida diretamente nas imagens (public/cards/baelf_*_*.png): mesma
+// posição nas 4 cores, só a cor do anel muda com a carta. Índice no
+// array = ordem de preenchimento (baelf.bulbs[0] acende o primeiro, etc.).
+const SLOT_POS = {
+  1: [{ x: 49.6, y: 80.5 }],
+  2: [{ x: 36.9, y: 80.4 }, { x: 62.3, y: 80.5 }],
+  3: [{ x: 25.0, y: 80.6 }, { x: 49.6, y: 80.6 }, { x: 73.9, y: 80.6 }],
+  4: [{ x: 49.7, y: 74.0 }, { x: 70.0, y: 80.7 }, { x: 29.0, y: 80.8 }, { x: 49.5, y: 87.1 }],
+};
+
 function mkBaelf(baelf, opts = {}) {
   const div = ce('div', 'baelf-card' +
     (opts.clickable ? ' clickable' : '') +
@@ -1148,24 +1175,23 @@ function mkBaelf(baelf, opts = {}) {
   div.appendChild(img);
 
 
-  // Semi-transparent overlay at bottom with symbol + slots
-  const overlay = ce('div', 'baelf-overlay');
-
-  const slots = ce('div', 'baelf-slots');
-  for (let s = 0; s < baelf.slots; s++) {
-    const dot = ce('div', 'baelf-slot');
-    if (s < baelf.bulbs.length) {
-      const ownerColor = _gs?.players[baelf.bulbs[s]]?.color;
-      const hex = COLOR_HEX[ownerColor] || 'rgba(255,255,255,.6)';
-      dot.style.background = hex;
-      dot.style.boxShadow  = `0 0 4px ${hex}`;
-      dot.title = _gs?.players[baelf.bulbs[s]]?.name || '';
-    }
-    slots.appendChild(dot);
+  // Um círculo colorido por bolbo preenchido, sobre o anel já desenhado
+  // na arte — os anéis ainda vazios não precisam de nada em cima.
+  const positions = SLOT_POS[baelf.slots] || [];
+  for (let s = 0; s < baelf.bulbs.length; s++) {
+    const pos = positions[s];
+    if (!pos) continue;
+    const ownerColor = _gs?.players[baelf.bulbs[s]]?.color;
+    const hex = COLOR_HEX[ownerColor] || 'rgba(255,255,255,.6)';
+    const bulb = ce('div', 'baelf-bulb');
+    bulb.style.left  = pos.x + '%';
+    bulb.style.top   = pos.y + '%';
+    bulb.style.background = hex;
+    bulb.style.color      = hex; // currentColor usado no box-shadow
+    bulb.title = _gs?.players[baelf.bulbs[s]]?.name || '';
+    div.appendChild(bulb);
   }
-  overlay.appendChild(slots);
-  overlay.appendChild(ce('div', 'baelf-count', `${baelf.bulbs.length}/${baelf.slots}`));
-  div.appendChild(overlay);
+  div.appendChild(ce('div', 'baelf-count-badge', `${baelf.bulbs.length}/${baelf.slots}`));
   return div;
 }
 

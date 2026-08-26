@@ -54,6 +54,7 @@
   --radius-md: 14px;
   --radius-lg: 24px;
   --radius-pill: 999px;
+  --radius-card: 10px;
   --shadow-sm: 0 6px 18px -6px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 12px 28px -8px rgba(0, 0, 0, 0.55);
   --radius: var(--radius-sm); /* legado: algumas regras abaixo ainda referenciam var(--radius) */
@@ -261,7 +262,7 @@ input  { font: inherit; }
 .baelf-card {
   width: var(--baelf-w);
   height: calc(var(--baelf-w) * 15 / 9);
-  border-radius: var(--radius-sm); border: 2px solid var(--border);
+  border-radius: var(--radius-card); border: 2px solid var(--border);
   overflow: hidden;
   cursor: default; position: relative; user-select: none;
   transition: border-color .2s, transform .15s, box-shadow .2s, z-index 0s;
@@ -289,7 +290,7 @@ input  { font: inherit; }
 /* Image fills card, full from top — no offset */
 .baelf-card img.baelf-img {
   position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; object-position: center top; border-radius: var(--radius-sm);
+  object-fit: cover; object-position: center top; border-radius: var(--radius-card);
 }
 /* Os anéis onde os bolbos entram já estão desenhados na própria arte de
    cada carta (na cor da carta), nas mesmas posições em todas as cores —

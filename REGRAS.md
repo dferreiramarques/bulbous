@@ -31,7 +31,7 @@ Bulbous joga-se com **2 jogadores**, **4 jogadores** (individual) ou **4 jogador
 1. Cada jogador escolhe um símbolo (Triângulo ou Círculo) e fica com 2 conjuntos de cartas de Baelfungious desse símbolo, num total de 8 cartas (2 Líder, 2 Bailio, 2 Adulto, 2 Juvenil).
 2. Cada jogador fica com 15 bolbos: separa já 1 como Bolbo de Ronda, ficando com 14 para jogar.
 3. Baralha o baralho de Cartas de Charme. Cada jogador tira 9 cartas.
-4. Cada jogador empurra 2 Cartas de Baelfungious para o centro da mesa. No total há 4 Baelfungious ativas para a ronda (2 de cada jogador).
+4. Cada jogador empurra 2 Cartas de Baelfungious para o centro da mesa — **uma de cada uma das suas 2 cores, nunca duas da mesma cor**. No total há 4 Baelfungious ativas para a ronda (2 de cada jogador, uma de cada cor), cobrindo sempre as 4 cores do jogo em simultâneo.
 5. O jogador mais novo declara a sequência da primeira ronda (ver IV.1). A partir da segunda ronda, os jogadores alternam essa função entre si, ronda a ronda.
 
 ### C. Jogo de 4 Jogadores em Equipas (2 contra 2)
@@ -68,7 +68,7 @@ Os jogadores jogam no sentido dos ponteiros do relógio. No teu turno, na vaza e
 
 Depois de resolvidas as quatro vazas, pela ordem declarada:
 
-- Remove do centro da mesa qualquer Baelfungious já completa e coloca-a na área do seu dono. Esse jogador seleciona uma nova Baelfungious para se tornar ativa na(s) próxima(s) ronda(s).
+- Remove do centro da mesa qualquer Baelfungious já completa e coloca-a na área do seu dono. Esse jogador seleciona uma nova Baelfungious para se tornar ativa na(s) próxima(s) ronda(s) — no Jogo de 2 Jogadores, a escolha tem sempre de ser da mesma cor da que saiu (nunca pode ficar com 2 ativas da mesma cor ao mesmo tempo; ver III.B.4).
 - Reabastece a mão de cada jogador até 7 cartas (9 no Jogo de 2 Jogadores). Se o baralho acabar, baralha a pilha de descarte para formar um novo baralho. O Governante de Ronda reabastece primeiro, seguido dos jogadores à sua esquerda.
 - O Governante de Ronda recupera o seu Bolbo de Ronda (não é gasto, apenas reutilizado). A função de Governante passa ao jogador à esquerda (ou, no Jogo de 2 Jogadores, alterna para o outro jogador), que usa o seu próprio Bolbo de Ronda na próxima ronda.
 
@@ -106,6 +106,9 @@ R: Não. A ordem é fixada no início da ronda, antes de qualquer aposta, e mant
 
 **P: O Bolbo de Ronda conta para a pontuação?**
 R: Não. É só um marcador — nunca é colocado numa Baelfungious e não pontua. Só os outros 14 bolbos de cada jogador entram em jogo.
+
+**P: No Jogo de 2 Jogadores, posso ter as minhas 2 Baelfungious ativas da mesma cor ao mesmo tempo?**
+R: Não, nunca. As tuas 2 posições ativas têm sempre de ser de cores diferentes — uma de cada uma das tuas 2 cores. Se uma Baelfungious completa sair da mesa, a substituta tem de ser da mesma cor que saiu (é a única forma de manter as 2 cores cobertas). Se essa cor já não tiver mais nenhuma Baelfungious por ativar (as 4 já completas ou já em jogo), essa posição fica vazia até ao fim do jogo — passas a jogar só com 1 Baelfungious ativa.
 
 ## VIII. Mecânicas de Jogo
 

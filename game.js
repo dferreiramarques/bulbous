@@ -172,6 +172,24 @@ function drawN(g, n) {
   return drawn;
 }
 
+// Removes from g.replaceNeeded any pending CHOOSE_BAELFUNGIOUS entry that
+// has zero valid candidates (2-player mode only — a player's active slots
+// must always be 2 different colours, see chooseBaelf). This can happen
+// the instant a round starts (before anyone has chosen anything yet), not
+// just as a side effect of another choice, so this must run both right
+// after replaceNeeded is (re)built AND after every resolved choice —
+// otherwise a truly unfillable slot leaves the phase stuck forever.
+function pruneUnfillableChoices(g) {
+  if (g.numSlots <= 1) return;
+  g.replaceNeeded = g.replaceNeeded.filter((r) => {
+    const p = g.players[r.playerIdx];
+    const activeColors = p.activeSlots.filter((bi) => bi !== null).map((bi) => p.baelfungious[bi].color);
+    return p.baelfungious.some(
+      (b, i) => !b.complete && !p.activeSlots.includes(i) && !activeColors.includes(b.color)
+    );
+  });
+}
+
 // All centre baelfungious: [{playerIdx, slotIdx, baelfIdx, baelf}]
 function getActives(g) {
   const out = [];
@@ -234,9 +252,27 @@ function chooseBaelf(g, playerIdx, baelfIdx) {
   if (baelf.complete) return { error: 'Baelfungious já completa' };
   if (p.activeSlots.includes(baelfIdx)) return { error: 'Já está ativa noutra posição' };
 
+  // No Jogo de 2 Jogadores (numSlots > 1) cada jogador controla 2 cores, e as
+  // suas posições ativas têm sempre de ser de cores diferentes — nunca 2 da
+  // mesma cor ao mesmo tempo (ver REGRAS.md, III.B).
+  if (g.numSlots > 1) {
+    const activeColors = p.activeSlots
+      .filter((bi) => bi !== null)
+      .map((bi) => p.baelfungious[bi].color);
+    if (activeColors.includes(baelf.color))
+      return { error: 'Já tens uma Baelfungious ativa dessa cor' };
+  }
+
   // Place the choice
   p.activeSlots[slotIdx] = baelfIdx;
   g.replaceNeeded.splice(pendingIdx, 1);
+
+  // Esta escolha pode ter deixado uma outra posição pendente do mesmo
+  // jogador sem nenhuma opção válida (ex.: a única cor que lhe resta já
+  // está toda completa/ativa). Sem isto, essa posição ficaria à espera de
+  // uma escolha impossível para sempre — trata-a como permanentemente
+  // vazia, tal como o esgotamento total já é tratado em endRound.
+  pruneUnfillableChoices(g);
 
   // ── Endgame check (after all pending for this player are resolved) ────────
   const stillPending = g.replaceNeeded.filter(r => r.playerIdx === playerIdx);
@@ -677,7 +713,13 @@ function endRound(g) {
 
   if (replaceNeeded.length > 0) {
     g.replaceNeeded = replaceNeeded;
-    g.phase         = 'CHOOSE_BAELFUNGIOUS';
+    // A entrada pode já nascer sem opção válida (ex. a única cor que falta
+    // reabastecer a este jogador já ficou toda completa numa ronda
+    // anterior) — antes de sequer chegar a CHOOSE_BAELFUNGIOUS, tira já as
+    // que não têm hipótese, para não ficarem à espera de uma escolha
+    // impossível sem ninguém alguma vez a resolver.
+    pruneUnfillableChoices(g);
+    g.phase = g.replaceNeeded.length > 0 ? 'CHOOSE_BAELFUNGIOUS' : 'CHOOSE_SEQUENCE';
   } else {
     g.replaceNeeded = [];
     g.phase         = 'CHOOSE_SEQUENCE';
@@ -836,10 +878,20 @@ function buildView(g, playerIdx) {
 function botChooseBaelf(g, playerIdx) {
   const p         = g.players[playerIdx];
   const activeSet = new Set(p.activeSlots.filter(s => s !== null));
-  const available = p.baelfungious
+  // Mesma regra de chooseBaelf: no Jogo de 2 Jogadores não pode escolher uma
+  // cor já ativa noutra das suas posições.
+  const activeColors = g.numSlots > 1
+    ? p.activeSlots.filter(bi => bi !== null).map(bi => p.baelfungious[bi].color)
+    : [];
+  let available = p.baelfungious
     .map((b, i) => ({ b, i }))
-    .filter(({ b, i }) => !b.complete && !activeSet.has(i));
-  if (!available.length) return null;
+    .filter(({ b, i }) => !b.complete && !activeSet.has(i) && !activeColors.includes(b.color));
+  if (!available.length) {
+    // Nada de cor válida sobra (ex. essa cor já ficou toda completa) — em
+    // vez de travar o jogo à espera de uma escolha impossível, esta posição
+    // fica vazia (mesmo tratamento do esgotamento total em endRound).
+    return null;
+  }
   // Randomize strategy: 40% prefer fewest slots, 30% prefer most slots, 30% random
   const r = Math.random();
   if (r < 0.40) available.sort((a, b) => a.b.slots - b.b.slots);      // aggressive (fast complete)

@@ -1463,11 +1463,17 @@ function renderMyBaelfs(st) {
   const aset = new Set(me.activeSlots.filter(s => s !== null));
   const myPending = (st.phase === 'CHOOSE_BAELFUNGIOUS') &&
     st.replaceNeeded.some(r => r.playerIdx === st.myIdx);
+  // Jogo de 2 Jogadores (2 posições ativas): não oferecer como opção uma
+  // Baelfungious da mesma cor que já está ativa na outra posição — o
+  // servidor recusa isso (ver game.js chooseBaelf), é só evitar o clique.
+  const activeColors = me.activeSlots.length > 1
+    ? new Set([...aset].map(bi => me.baelfungious[bi].color))
+    : new Set();
 
   for (let bi = 0; bi < me.baelfungious.length; bi++) {
     const baelf    = me.baelfungious[bi];
     const isActive = aset.has(bi);
-    const isAvail  = myPending && !isActive && !baelf.complete;
+    const isAvail  = myPending && !isActive && !baelf.complete && !activeColors.has(baelf.color);
     const isSel    = _selBaelf && _selBaelf.baelfIdx === bi;
 
     const wrap = ce('div','my-baelf-wrap');

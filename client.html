@@ -1273,7 +1273,10 @@ function renderGame(st) {
   // silently jumping into whatever the game has already moved on to.
   const lr = st.lastTrickResult;
   if (lr && !lr.tied && st.phase !== 'GAME_OVER') {
-    const key = `${lr.trickTargetPlayerIdx}-${lr.trickTargetSlotIdx}-${st.roundNum}`;
+    // Keyed by round+trick, not by target — the same Baelfungious slot can
+    // be the target of several tricks in one round (one per bulb), which
+    // used to collide on a target-only key and silently skip the recap.
+    const key = `${lr.roundNum}-${lr.trickNum}`;
     if (_recapKey !== key) {
       _recapKey  = key;
       _recapOpen = true;
@@ -1300,8 +1303,11 @@ function recapInfoFor(lr, st, i) {
   if (at === 'swap') return { text: '🔄 Trocou', color: '#7ab8ff' };
   const sc = lr.scores?.[i];
   if (sc != null) {
-    const total  = sc.total === Infinity ? '∞' : sc.total;
-    const isW    = lr.winner === i;
+    // sc.total is Infinity for a joker bet server-side, but JSON has no
+    // Infinity — it round-trips over the WebSocket as null, so jokerWin
+    // (a plain boolean) is the only reliable signal for that case here.
+    const total  = sc.jokerWin ? '∞' : sc.total;
+    const isW    = lr.winner === i || lr.tieWinner === i;
     const trophy = isW ? ' 🏆' : '';
     return { text: `Apostou ${total}${trophy}`, color: isW ? 'var(--yellow)' : COLOR_HEX[p.color] || '#aaa' };
   }
@@ -1591,7 +1597,7 @@ function renderActionBar(st) {
       // After reveal: show score + trophy
       if (lr && lr.scores?.[st.myIdx] !== undefined && myAt === 'bet') {
         const sc = lr.scores[st.myIdx];
-        const total = sc.total === Infinity ? '∞' : sc.total;
+        const total = sc.jokerWin ? '∞' : sc.total;
         const isW   = lr.winner === st.myIdx || lr.tieWinner === st.myIdx;
         const isTied = lr.tiedPlayers?.includes(st.myIdx);
         const emoji  = isW ? ' 🏆 Ganhaste!' : isTied ? ' ⚔️ Empate' : '';

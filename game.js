@@ -481,6 +481,8 @@ function revealTrick(g) {
 
   // Base result object (may be augmented by tiebreak later)
   const result = {
+    roundNum:              g.roundNum,
+    trickNum:              g.trickNum,
     trickTargetPlayerIdx: t.targetPlayerIdx,
     trickTargetSlotIdx:   t.targetSlotIdx,
     bets:        t.bets,

@@ -55,8 +55,13 @@
   --radius-lg: 24px;
   --radius-pill: 999px;
   --radius-card: 12px;
-  --shadow-sm: 0 6px 18px -6px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 12px 28px -8px rgba(0, 0, 0, 0.55);
+  /* sombras tingidas ao --bg desta skin (quase-preto), não pretas fixas —
+     mesmo mecanismo --shadow-color-rgb do resto do design system, para
+     um jogo com --ink claro (ex. Capivaras) poder seguir a própria tinta
+     em vez de herdar preto. Ver game-ui.css no pacote partilhado. */
+  --shadow-color-rgb: 13, 13, 26; /* rgb de --bg */
+  --shadow-card: 0 6px 18px -6px rgba(var(--shadow-color-rgb), 0.5);
+  --shadow-card-hover: 0 12px 28px -8px rgba(var(--shadow-color-rgb), 0.55);
   --radius: var(--radius-sm); /* legado: algumas regras abaixo ainda referenciam var(--radius) */
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -83,7 +88,7 @@ input  { font: inherit; }
   border-radius: var(--radius-pill); font-size: 13px; z-index: 9999;
   font-weight: 600;
   transition: transform .3s ease; pointer-events: none;
-  max-width: 90vw; text-align: center; box-shadow: var(--shadow-md);
+  max-width: 90vw; text-align: center; box-shadow: var(--shadow-card-hover);
 }
 #toast.show { transform: translateX(-50%) translateY(0); }
 
@@ -164,7 +169,7 @@ input  { font: inherit; }
 .waiting-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
   padding: 28px 36px; width: min(400px,92vw); display: flex; flex-direction: column; gap: 16px;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-card-hover);
 }
 .waiting-card h3 { font-family: var(--font-display); font-weight: 700; color: var(--accent); font-size: 1.2rem; }
 .seat-list { display: flex; flex-direction: column; gap: 8px; }
@@ -251,7 +256,7 @@ input  { font: inherit; }
   background: var(--accent); color: #000; font-family: var(--font-display); font-size: 1.05rem; font-weight: 800;
   border-radius: var(--radius-pill); border: 2px solid #fff;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-card-hover);
 }
 .trick-pips {
   display: flex; gap: 3px; flex-wrap: wrap; justify-content: center;
@@ -268,7 +273,7 @@ input  { font: inherit; }
   transition: border-color .2s, transform .15s, box-shadow .2s, z-index 0s;
 }
 .baelf-card.clickable { cursor: pointer; }
-.baelf-card.clickable:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); z-index: 30; position: relative; }
+.baelf-card.clickable:hover { transform: translateY(-6px); box-shadow: var(--shadow-card-hover); z-index: 30; position: relative; }
 .baelf-card.selected  { border-color: var(--accent) !important; box-shadow: 0 0 16px var(--accent); z-index: 30; position: relative; transform: translateY(-4px); }
 .baelf-card.contested {
   border-color: var(--yellow) !important;
@@ -334,7 +339,7 @@ input  { font: inherit; }
   transition: border-color .15s, transform .15s, box-shadow .15s;
 }
 .charm-card.clickable { cursor: pointer; }
-.charm-card.clickable:hover { transform: translateY(-7px); box-shadow: var(--shadow-sm); z-index: 20; }
+.charm-card.clickable:hover { transform: translateY(-7px); box-shadow: var(--shadow-card); z-index: 20; }
 .charm-card.selected { border-color: var(--accent) !important; box-shadow: 0 0 10px var(--accent); transform: translateY(-9px); z-index: 20; }
 .charm-card.invalid  { opacity: .3; cursor: not-allowed; }
 .charm-top   { font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; line-height: 1; }
@@ -385,7 +390,7 @@ input  { font: inherit; }
   background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-md);
   padding: 22px 26px; max-width: 92vw; width: 460px;
   display: flex; flex-direction: column; gap: 12px; max-height: 88vh; overflow-y: auto;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-card-hover);
 }
 .reveal-title { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: var(--accent); }
 .reveal-row   {
@@ -405,7 +410,7 @@ input  { font: inherit; }
   background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-md);
   padding: 20px 24px; max-width: 92vw; width: 400px;
   display: flex; flex-direction: column; gap: 10px;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-card-hover);
 }
 .tiebreak-title { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--yellow); }
 #tb-hand { display: flex; gap: 5px; flex-wrap: wrap; min-height: calc(var(--card-h) + 8px); }
@@ -415,7 +420,7 @@ input  { font: inherit; }
   background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-md);
   padding: 24px 28px; max-width: 92vw; width: 460px;
   display: flex; flex-direction: column; gap: 16px; max-height: 88vh; overflow-y: auto;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-card-hover);
 }
 .gameover-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; color: var(--accent); text-align: center; }
 .score-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
@@ -451,7 +456,7 @@ input  { font: inherit; }
   background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-md);
   padding: 24px 28px; max-width: 92vw; width: 580px; max-height: 88vh;
   display: flex; flex-direction: column; gap: 0; overflow: hidden;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-card-hover);
 }
 .rules-header {
   display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-shrink: 0;

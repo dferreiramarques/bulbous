@@ -290,8 +290,14 @@ input  { font: inherit; }
   border-color: var(--yellow) !important;
   box-shadow: 0 0 22px 3px var(--yellow), 0 0 8px 2px #fff9;
 }
-.baelf-card.complete  { opacity: .45; }
-.baelf-card.past-trick { filter: brightness(.8); }
+/* Escurece só a arte da carta (não o cartão inteiro) — os bolbos
+   preenchidos (.baelf-bulb) e o badge de contagem são irmãos da
+   imagem, não filhos dela, por isso ficam de fora e mantêm sempre a
+   cor cheia. Dimmed opacity/filter no .baelf-card em si escurecia
+   tudo por igual, incluindo essas cores, o que as tornava difíceis
+   de ler numa carta completa ou já jogada. */
+.baelf-card.complete  .baelf-img { opacity: .45; }
+.baelf-card.past-trick .baelf-img { filter: brightness(.8); }
 /* Centre-area baelf cards: 150% */
 #centre-area .baelf-card {
   width: var(--centre-baelf-w);

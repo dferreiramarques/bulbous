@@ -69,6 +69,7 @@ function makeLobby(def) {
     graceTimers: Array(def.max).fill(null),
     botTimer:    null,
     tieTimer:    null,
+    ephemeral:   false,
   };
 }
 
@@ -94,8 +95,14 @@ function lobbyInfo(lobby) {
   };
 }
 
+// Ephemeral (per-player AI) instances are never listed — only the
+// permanent templates they were cloned from show up in the lobby.
+function publicLobbies() {
+  return Object.values(lobbies).filter(l => !l.ephemeral).map(lobbyInfo);
+}
+
 function broadcastLobbyList() {
-  const list = Object.values(lobbies).map(lobbyInfo);
+  const list = publicLobbies();
   for (const ws of wss.clients) {
     const st = wsState.get(ws);
     if (!st || !st.lobbyId) send(ws, { type: 'LOBBIES', lobbies: list });
@@ -175,8 +182,22 @@ function handleJoin(ws, msg) {
   const name = (msg.playerName || '').trim().slice(0, 20);
   if (!name) { send(ws, { type: 'ERROR', text: 'Nome inválido' }); return; }
 
-  const lobby = lobbies[msg.lobbyId];
+  let lobby = lobbies[msg.lobbyId];
   if (!lobby) { send(ws, { type: 'ERROR', text: 'Mesa não encontrada' }); return; }
+
+  // AI tables are templates, not shared tables: each player who "enters" one
+  // gets their own private, ephemeral instance, cloned from the template.
+  // It never shows up in the lobby list and is torn down as soon as the
+  // player leaves (or fails to reconnect), so it can never get stuck "occupied".
+  if (lobby.solo && !lobby.ephemeral) {
+    const def = LOBBY_DEFS.find(d => d.id === lobby.id);
+    const instance = makeLobby(def);
+    instance.id = `${def.id}#${randToken()}`;
+    instance.ephemeral = true;
+    lobbies[instance.id] = instance;
+    lobby = instance;
+  }
+
   if (lobby.game) { send(ws, { type: 'ERROR', text: 'Jogo já em curso nesta mesa' }); return; }
 
   const seat = lobby.players.indexOf(null);
@@ -256,6 +277,8 @@ function hardLeave(lobby, seat, { timedOut = false } = {}) {
   // If game running, abort it (player left permanently)
   if (lobby.game) {
     lobby.game = null;
+    clearTimeout(lobby.botTimer);
+    clearTimeout(lobby.tieTimer);
     const reason = timedOut
       ? `Perdemos um jogador — ${name} não reconectou a tempo. O jogo foi encerrado.`
       : `${name} saiu do jogo. O jogo foi encerrado.`;
@@ -265,6 +288,9 @@ function hardLeave(lobby, seat, { timedOut = false } = {}) {
       if (p && i !== seat) send(p, { type: 'OPPONENT_LEFT', seat, name });
     });
   }
+
+  // Private AI instance: nobody else can ever use it again, so free it now.
+  if (lobby.ephemeral) delete lobbies[lobby.id];
 
   broadcastLobbyList();
 }
@@ -310,7 +336,7 @@ function handleStart(lobby) {
 function dispatch(ws, msg) {
   // Stateless / pre-lobby messages
   if (msg.type === 'PING')      { send(ws, { type: 'PONG' }); return; }
-  if (msg.type === 'LOBBIES')   { send(ws, { type: 'LOBBIES', lobbies: Object.values(lobbies).map(lobbyInfo) }); return; }
+  if (msg.type === 'LOBBIES')   { send(ws, { type: 'LOBBIES', lobbies: publicLobbies() }); return; }
   if (msg.type === 'RECONNECT') { handleReconnect(ws, msg); return; }
   if (msg.type === 'JOIN_LOBBY'){ handleJoin(ws, msg); return; }
 
@@ -485,7 +511,7 @@ const wss = new WebSocketServer({ server });
 
 wss.on('connection', ws => {
   // Send lobby list immediately on connect
-  send(ws, { type: 'LOBBIES', lobbies: Object.values(lobbies).map(lobbyInfo) });
+  send(ws, { type: 'LOBBIES', lobbies: publicLobbies() });
 
   ws.on('message', raw => {
     let msg;
@@ -506,11 +532,13 @@ wss.on('connection', ws => {
     // Null the socket but keep seat reserved
     lobby.players[seat] = null;
 
-    // ── Solo: never abort the game on disconnect.
-    // Cold-starts, mobile backgrounding, etc. cause brief drops.
-    // The bot loop keeps running; the human reconnects via their token.
+    // ── Solo (private AI instance): don't abort on a brief drop —
+    // cold-starts, mobile backgrounding, etc. The bot loop keeps running
+    // and the human can reconnect via their token. But if they never come
+    // back, free the instance after the grace window instead of leaking it.
     if (lobby.solo) {
-      broadcastLobbyList();
+      clearTimeout(lobby.graceTimers[seat]);
+      lobby.graceTimers[seat] = setTimeout(() => hardLeave(lobby, seat, { timedOut: true }), GRACE_MS);
       return;
     }
 

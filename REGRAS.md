@@ -69,7 +69,7 @@ Os jogadores jogam no sentido dos ponteiros do relógio. No teu turno, na vaza e
 Depois de resolvidas as quatro vazas, pela ordem declarada:
 
 - Remove do centro da mesa qualquer Baelfungious já completa e coloca-a na área do seu dono. Esse jogador seleciona uma nova Baelfungious para se tornar ativa na(s) próxima(s) ronda(s) — no Jogo de 2 Jogadores, a escolha tem sempre de ser da mesma cor da que saiu (nunca pode ficar com 2 ativas da mesma cor ao mesmo tempo; ver III.B.4).
-- Reabastece a mão de cada jogador até 7 cartas (9 no Jogo de 2 Jogadores). Se o baralho acabar, baralha a pilha de descarte para formar um novo baralho. O Governante de Ronda reabastece primeiro, seguido dos jogadores à sua esquerda.
+- Se pelo menos uma Baelfungious ficou completa nesta ronda (ou seja, se entra uma nova Baelfungious na zona ativa), reabastece a mão de cada jogador até 7 cartas (9 no Jogo de 2 Jogadores). Se nenhuma ficou completa, ninguém compra cartas. Se o baralho acabar, baralha a pilha de descarte para formar um novo baralho. O Governante de Ronda reabastece primeiro, seguido dos jogadores à sua esquerda.
 - O Governante de Ronda recupera o seu Bolbo de Ronda (não é gasto, apenas reutilizado). A função de Governante passa ao jogador à esquerda (ou, no Jogo de 2 Jogadores, alterna para o outro jogador), que usa o seu próprio Bolbo de Ronda na próxima ronda.
 
 ## V. Fim do Jogo
@@ -84,9 +84,9 @@ A pontuação é sempre calculada por jogador individual, em todos os modos de j
 2. **Bónus de Controlo de Área:**
    - **Maioria** — Se tiveres o maior número de bolbos numa Baelfungious completa, ganhas +3 pontos.
    - **Empate na Maioria** — Se os jogadores empatarem no maior número de bolbos, cada jogador empatado ganha +1 ponto.
-3. **Bónus de Coleção** (opcional):
-   - **Todas as Cores** — +5 pontos se completares pelo menos uma Baelfungious de cada cor.
-   - **Todos os Espécimes** — +10 pontos se completares um conjunto dos 4 tipos (Líder, Bailio, Adulto, Juvenil).
+3. **Bónus de Coleção** — contam as Baelfungious completas em que tens a maioria dos bolbos (um empate na maioria também conta):
+   - **Todas as Cores** — +5 pontos se tiveres a maioria em pelo menos uma Baelfungious completa de cada uma das 4 cores.
+   - **Todos os Espécimes** — +10 pontos se tiveres a maioria em pelo menos uma Baelfungious completa de cada um dos 4 tipos (Líder, Bailio, Adulto, Juvenil).
 
 ### 4. Como Vencer
 

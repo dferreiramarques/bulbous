@@ -587,11 +587,53 @@ input  { font: inherit; }
   75%  { opacity: 1; top: 50px; }
   100% { opacity: 0; top: 40px; }
 }
+
+/* ═══════════════════════════════════════════════════════
+   TUTORIAL (tour guiado + ronda de treino local)
+   Acima das overlays de jogo (500) para poder destacar a caixa de
+   revelação, abaixo das Regras (700) para o 📖 continuar utilizável.
+═══════════════════════════════════════════════════════ */
+#tut-spot {
+  display: none; position: fixed; z-index: 650; pointer-events: none;
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 9999px rgba(5, 5, 15, .62), 0 0 0 2px var(--accent), 0 0 24px var(--accent);
+  transition: top .25s ease, left .25s ease, width .25s ease, height .25s ease;
+}
+#tut-spot.show { display: block; }
+#tut-coach {
+  display: none; position: fixed; z-index: 660; left: 50%; transform: translateX(-50%);
+  width: min(420px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow-y: auto;
+  background: var(--surface2); border: 1px solid var(--accent); border-radius: var(--radius-md);
+  padding: 16px 18px; box-shadow: var(--shadow-card-hover);
+  flex-direction: column; gap: 10px;
+}
+#tut-coach.show { display: flex; }
+#tut-coach.center { top: 50% !important; transform: translate(-50%, -50%); }
+.tut-progress { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.tut-progress span { display: block; height: 100%; background: var(--accent); transition: width .25s ease; }
+.tut-title { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; color: var(--accent); }
+.tut-body { font-size: .88rem; line-height: 1.55; color: var(--text); display: flex; flex-direction: column; gap: 6px; }
+.tut-body ul { padding-left: 18px; display: flex; flex-direction: column; gap: 3px; }
+.tut-body strong { color: #fff; }
+.tut-order { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 2px 0; }
+.tut-chip {
+  padding: 2px 9px; border-radius: var(--radius-pill); border: 1px solid; font-size: .78rem; font-weight: 600;
+  transition: opacity .2s;
+}
+.tut-chip.now  { background: var(--surface); box-shadow: 0 0 10px currentColor; }
+.tut-chip.done { opacity: .45; }
+.tut-arrow { color: var(--muted); font-size: .8rem; }
+.tut-hint { font-size: .82rem; color: var(--yellow); font-weight: 600; }
+.tut-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tut-skip { margin-right: auto; background: transparent; color: var(--muted); font-size: .8rem; text-decoration: underline; padding: 4px 0; }
+.tut-skip:hover { color: var(--text); }
 </style>
 </head>
 <body>
 
 <div id="toast"></div>
+<div id="tut-spot"></div>
+<div id="tut-coach"></div>
 <div id="refill-banner">🃏 Mão reabastecida!</div>
 <!-- PWA Install Banner (Android / Chrome) -->
 <div id="pwa-banner" class="hidden">
@@ -652,12 +694,12 @@ input  { font: inherit; }
         <ul>
           <li>🔵 <strong>1 ponto</strong> por cada bolbo colocado (em qualquer Baelfungious)</li>
           <li>👑 <strong>+3 pontos</strong> de maioria numa Baelfungious <em>completa</em> (ou +1 em caso de empate)</li>
-          <li>🌈 <strong>+5 pontos</strong> por ter pelo menos 1 Baelfungious completa de cada cor</li>
-          <li>⭕▲ <strong>+5 pontos</strong> por ter pelo menos 1 Baelfungious completa de cada símbolo</li>
+          <li>🌈 <strong>+5 pontos</strong> por teres a maioria em Baelfungious completas das 4 cores</li>
+          <li>🍄 <strong>+10 pontos</strong> por teres a maioria em Baelfungious completas dos 4 tipos (1, 2, 3 e 4 anéis)</li>
         </ul>
         <div class="rule-box">
           <strong>Baelfungious completa</strong> = todos os slots preenchidos com bolbos.<br>
-          Apenas as completas contam para maioria e coleção!
+          Apenas as completas contam para maioria e coleção! Um empate na maioria também conta para a coleção.
         </div>
       </div>
 
@@ -692,7 +734,7 @@ input  { font: inherit; }
         <ul>
           <li>Baelfungious completas são removidas do centro</li>
           <li>Os proprietários escolhem novas Baelfungious para substituir</li>
-          <li>Se pelo menos 1 completou: <strong>todos reabastecem a mão</strong> até ao limite</li>
+          <li>Quando entra uma nova Baelfungious (ou seja, se pelo menos 1 completou): <strong>todos reabastecem a mão</strong> até ao limite</li>
           <li>Se nenhuma completou: <strong>ninguém compra</strong> — gestão de mão crucial!</li>
         </ul>
         <h3>Fim do jogo</h3>
@@ -746,8 +788,8 @@ input  { font: inherit; }
         <ul>
           <li><strong>Bolbos:</strong> 1 ponto por bolbo (completo ou incompleto)</li>
           <li><strong>Maioria numa completa:</strong> +3 pts (ou +1 pts cada em empate)</li>
-          <li><strong>Coleção de cores:</strong> +5 pts por ter ≥1 completa de cada uma das 4 cores</li>
-          <li><strong>Coleção de símbolos:</strong> +5 pts por ter ≥1 completa ⭕ e ≥1 completa ▲</li>
+          <li><strong>Todas as Cores:</strong> +5 pts por teres a maioria (ou empate na maioria) em completas de cada uma das 4 cores</li>
+          <li><strong>Todos os Espécimes:</strong> +10 pts por teres a maioria (ou empate na maioria) em completas dos 4 tipos (1, 2, 3 e 4 anéis)</li>
         </ul>
         <div class="rule-box">
           <strong>Só Baelfungious completas</strong> contam para maioria e bónus de coleção.<br>
@@ -785,6 +827,7 @@ input  { font: inherit; }
   <div class="name-box">
     <input id="inp-name" type="text" maxlength="20" placeholder="O teu nome…" autocomplete="off" spellcheck="false">
     <button class="btn-primary" id="btn-go">Entrar →</button>
+    <button class="btn-ghost" id="btn-tut-name">🎓 Aprender a jogar (tutorial)</button>
   </div>
 </div>
 
@@ -794,6 +837,7 @@ input  { font: inherit; }
     <div class="lobby-header">
       <h2>BULBOUS</h2>
       <span id="lby-name"></span>
+      <button class="btn-ghost" id="btn-tut-lobby">🎓 Tutorial</button>
       <button class="btn-ghost" id="btn-rules-lobby">📖 Como Jogar?</button>
       <button class="btn-ghost" id="btn-change-name">Mudar nome</button>
     </div>
@@ -941,6 +985,7 @@ let _tieInt         = null;
 let _revealKey      = '';
 let _tieResultKey   = '';    // dedup: which resolved tiebreak result we've already shown
 let _tieResultOpen  = false; // true while the result panel is up, waiting for "Continuar"
+let _tut            = null;  // tutorial em curso: { st, i, botMsg, ... } — ver TUTORIAL
 
 // ══════════════════════════════════════════════════════════════
 // UTILS
@@ -957,6 +1002,9 @@ function toast(msg, ms = 3200) {
   _toastT = setTimeout(() => el.classList.remove('show'), ms);
 }
 function send(obj) {
+  // Durante o tutorial as ações de jogo vão para a ronda de treino local
+  // (ver TUTORIAL mais abaixo), nunca para o servidor.
+  if (_tut && TUT_ACTIONS.has(obj.type)) { tutOnAction(obj); return; }
   if (ws && ws.readyState === 1) ws.send(JSON.stringify(obj));
 }
 function el(id) { return document.getElementById(id); }
@@ -987,6 +1035,9 @@ document.addEventListener('visibilitychange', () => {
 // DISPATCHER
 // ══════════════════════════════════════════════════════════════
 function dispatch(msg) {
+  // Com o tutorial aberto, o servidor não pode mudar de ecrã por baixo dele
+  // (ex. um LOBBIES faria showScreen('screen-lobby')) — só guarda a lista.
+  if (_tut) { if (msg.type === 'LOBBIES') _lobbies = msg.lobbies; return; }
   switch (msg.type) {
     case 'PONG': break;
     case 'LOBBIES':
@@ -1256,7 +1307,7 @@ function renderGame(st) {
 
   // My badge
   const badge = el('my-name-badge');
-  badge.textContent       = me.name;
+  badge.textContent       = me.name + (st.governorIdx === st.myIdx ? ' 👑' : '');
   badge.style.color       = COLOR_HEX[me.color] || '#aaa';
   badge.style.borderColor = COLOR_HEX[me.color] || '#aaa';
   badge.style.background  = COLOR_DIM[me.color] || '#222';
@@ -1355,6 +1406,7 @@ function renderRecapBar(st) {
   bar.appendChild(mkBtn('▶ Continuar', 'btn-confirm', () => {
     _recapOpen = false;
     renderGame(_gs);
+    tutEvent('recapClosed');
   }));
 }
 
@@ -1824,7 +1876,10 @@ function handleReveal(st) {
   el('reveal-overlay').classList.add('show');
 }
 
-el('btn-dismiss-reveal').onclick = () => el('reveal-overlay').classList.remove('show');
+el('btn-dismiss-reveal').onclick = () => {
+  el('reveal-overlay').classList.remove('show');
+  tutEvent('revealClosed');
+};
 
 // ── Tiebreak ──────────────────────────────────────────────────
 function handleTiebreak(st) {
@@ -2051,12 +2106,13 @@ function submitName() {
   el('lby-name').textContent = myName;
   if (_lobbies.length) renderLobbyList();
   send({ type:'LOBBIES' });
+  if (!localStorage.getItem('bulb_tut_done')) toast('Primeira vez? Experimenta o 🎓 Tutorial', 5000);
 }
 
 el('btn-change-name').onclick = () => { myName = ''; showScreen('screen-name'); };
 el('btn-start').onclick       = () => send({ type:'START' });
 el('btn-leave-wait').onclick  = () => leaveGame();
-el('btn-leave').onclick       = () => leaveGame();
+el('btn-leave').onclick       = () => _tut ? endTutorial(false) : leaveGame();
 
 function leaveGame() {
   send({ type:'LEAVE_LOBBY' });
@@ -2211,6 +2267,530 @@ window.addEventListener('appinstalled', () => {
   el('pwa-banner').classList.add('hidden');
   _deferredInstall = null;
 });
+
+// ══════════════════════════════════════════════════════════════
+// TUTORIAL
+// Tour guiado sobre o ecrã de jogo real, com uma ronda de treino
+// 100% local contra 3 bots com jogadas fixas. O estado tem a mesma forma
+// que o buildView() do servidor, por isso é desenhado pelo renderGame()
+// de sempre; as ações do jogador são desviadas em send() para
+// tutOnAction() em vez de irem para o WebSocket.
+// ══════════════════════════════════════════════════════════════
+const TUT_ACTIONS = new Set(['CHOOSE_BAELF','CHOOSE_SEQUENCE','BET','SWAP','PASS','DISCARD_EXCESS','TIE_BREAK','RESTART','LEAVE_LOBBY']);
+const TUT_SYMBOL  = { red:'triangle', yellow:'triangle', blue:'circle', green:'circle' };
+const TUT_CNAME   = { red:'vermelha', blue:'azul', green:'verde', yellow:'amarela' };
+const TUT_CNAME_PL = { red:'vermelhas', blue:'azuis', green:'verdes', yellow:'amarelas' };
+
+function tutCard(id, color, value) {
+  return value === 'x2'
+    ? { id, type:'double',  color, symbol:null, value:null }
+    : { id, type:'numeric', color, symbol:null, value };
+}
+
+function tutNewState() {
+  const seats = [
+    { name: myName || 'Tu', color:'blue',   isBot:false },
+    { name: 'Rita',         color:'red',    isBot:true  },
+    { name: 'Tomás',        color:'green',  isBot:true  },
+    { name: 'Inês',         color:'yellow', isBot:true  },
+  ];
+  // Os bots já puseram a sua Baelfungious no centro (índice = nº de anéis − 1).
+  const botActive = [null, 2, 1, 3];
+  const players = seats.map((s, i) => ({
+    name: s.name, color: s.color, symbol: TUT_SYMBOL[s.color], team: null, isBot: s.isBot,
+    handSize: 7, endgameTriggered: false,
+    activeSlots: [botActive[i]],
+    baelfungious: [1, 2, 3, 4].map(slots => ({
+      color: s.color, symbol: TUT_SYMBOL[s.color], slots, bulbs: [], complete: false, owner: i,
+    })),
+  }));
+  // Mão escolhida para haver sempre uma aposta possível em qualquer cor e
+  // nenhum subconjunto somar 6 (o valor fixo da aposta da Rita) — assim a
+  // vaza de treino nunca acaba em empate.
+  const myHand = [
+    tutCard(1001, 'blue', 8), tutCard(1002, 'blue', 'x2'), tutCard(1003, 'red', 7),
+    tutCard(1004, 'red', 3),  tutCard(1005, 'green', 9),   tutCard(1006, 'green', 5),
+    tutCard(1007, 'yellow', 8),
+  ];
+  return {
+    myIdx: 0, mode: '4p', phase: 'CHOOSE_BAELFUNGIOUS', roundNum: 1, governorIdx: 0, endgameFired: false,
+    players, myHand, deckSize: 6, discardTop: null, discardSize: 0,
+    trick: null, trickQueue: null, trickNum: 0,
+    replaceNeeded: [{ playerIdx: 0, slotIdx: 0 }],
+    anyCompletedThisRound: false, lastTrickResult: null, finalScores: null, teamResult: null,
+  };
+}
+
+function startTutorial() {
+  closeRules();
+  closeOverlays();
+  _mode = ''; _selCards = []; _selBaelf = null; _seqOrder = [];
+  _prevPhase = ''; _prevHandSize = 0; _revealKey = '';
+  _tut = {
+    st: tutNewState(), i: 0, botMsg: '', busy: false, completed: false,
+    draws: [tutCard(1101,'red',5), tutCard(1102,'green',4), tutCard(1103,'yellow',9),
+            tutCard(1104,'blue',3), tutCard(1105,'red',9),  tutCard(1106,'yellow',3)],
+    timer: setInterval(tutPlace, 300),
+  };
+  tutGo(0);
+}
+
+function endTutorial(done) {
+  if (!_tut) return;
+  clearInterval(_tut.timer);
+  clearTimeout(_tut.botT);
+  _tut = null;
+  if (done) localStorage.setItem('bulb_tut_done', '1');
+  el('tut-coach').classList.remove('show');
+  el('tut-spot').classList.remove('show');
+  closeOverlays();
+  _gs = null; _prevPhase = ''; _prevHandSize = 0; _revealKey = '';
+  _mode = ''; _selCards = []; _selBaelf = null; _seqOrder = [];
+  if (myName) { showScreen('screen-lobby'); renderLobbyList(); send({ type:'LOBBIES' }); }
+  else showScreen('screen-name');
+}
+
+function tutDraw(n) {
+  const out = _tut.draws.splice(0, n);
+  _tut.st.deckSize = Math.max(0, _tut.st.deckSize - out.length);
+  return out;
+}
+
+function tutRender() {
+  const st = _tut.st;
+  st.players[0].handSize = st.myHand.length;
+  renderGame(st);
+  el('hdr-phase').textContent = '🎓 Tutorial';
+  tutShowStep();
+}
+
+function tutGo(i) {
+  _tut.i = i;
+  _tut.botMsg = '';
+  clearTimeout(_tut.botT);
+  const step = TUT_STEPS[i];
+  if (step.onEnter) step.onEnter(_tut.st);
+  tutRender();
+  const first = tutTargets()[0];
+  if (first) first.scrollIntoView({ block: 'nearest' });
+}
+
+// Avança quando o evento que o passo atual espera acontece — ou salta em
+// frente se o jogador se adiantou (ex. confirmou a sequência ainda durante
+// a explicação da mesa).
+function tutEvent(name) {
+  if (!_tut) return;
+  const idx = TUT_STEPS.findIndex((s, k) => k >= _tut.i && s.wait === name);
+  if (idx !== -1) tutGo(idx + 1);
+}
+
+function tutNope(msg) {
+  toast(msg || 'No tutorial, segue as indicações do balão 🙂');
+  tutRender();
+}
+
+// ── Ações do jogador (desviadas de send) ─────────────────────
+function tutOnAction(msg) {
+  const st = _tut.st, t = st.trick, me = st.players[0];
+  switch (msg.type) {
+    case 'LEAVE_LOBBY': case 'RESTART': return;
+
+    case 'CHOOSE_BAELF':
+      if (st.phase !== 'CHOOSE_BAELFUNGIOUS') return tutNope();
+      me.activeSlots[0] = msg.baelfIdx;
+      st.replaceNeeded = [];
+      st.phase = 'CHOOSE_SEQUENCE';
+      tutRender();
+      return tutEvent('CHOOSE_BAELF');
+
+    case 'CHOOSE_SEQUENCE':
+      if (st.phase !== 'CHOOSE_SEQUENCE' || st.governorIdx !== 0) return tutNope();
+      st.trickQueue = msg.order.map(o => ({ playerIdx: o.playerIdx, slotIdx: o.slotIdx }));
+      tutStartTrick(0);
+      tutRender();
+      return tutEvent('CHOOSE_SEQUENCE');
+
+    case 'BET': case 'SWAP': case 'PASS': {
+      if (!t || st.trickNum !== 0 || t.revealed)
+        return tutNope('No tutorial jogamos só a 1ª vaza — carrega em Seguinte');
+      if (t.actionOrder[t.currentActorIdx] !== 0) return tutNope();
+      const cards = (msg.cardIds || []).map(id => st.myHand.find(c => c.id === id)).filter(Boolean);
+      const take  = () => { for (const c of cards) st.myHand.splice(st.myHand.indexOf(c), 1); };
+      if (msg.type === 'BET') {
+        const baelf = activeBaelf(st);
+        if (!cards.length || cards.some(c => !cardCanPlay(c, baelf))) return tutNope('Essas cartas não servem nesta Baelfungious');
+        take();
+        t.bets[0] = cards; t.actionTypes[0] = 'bet';
+      } else if (msg.type === 'SWAP') {
+        if (cards.length < 1 || cards.length > 2) return tutNope('Troca 1 ou 2 cartas');
+        take();
+        st.discardSize += cards.length;
+        st.myHand.push(...tutDraw(cards.length));
+        t.bets[0] = []; t.actionTypes[0] = 'swap';
+      } else {
+        // Igual ao servidor: compra 1 e, se passar do limite, descarta o excesso.
+        st.myHand.push(...tutDraw(1));
+        t.bets[0] = []; t.actionTypes[0] = 'pass';
+        if (st.myHand.length > 7) {
+          t.waitingForDiscard = 0; t.discardExcess = st.myHand.length - 7;
+          return tutRender();
+        }
+      }
+      t.currentActorIdx++;
+      tutRender();
+      return tutEvent('myAction');
+    }
+
+    case 'DISCARD_EXCESS': {
+      if (!t || t.waitingForDiscard !== 0) return tutNope();
+      const cards = msg.cardIds.map(id => st.myHand.find(c => c.id === id)).filter(Boolean);
+      if (cards.length !== t.discardExcess) return tutNope(`Seleciona ${t.discardExcess} carta(s)`);
+      for (const c of cards) st.myHand.splice(st.myHand.indexOf(c), 1);
+      st.discardSize += cards.length;
+      t.waitingForDiscard = -1; t.discardExcess = 0;
+      t.currentActorIdx++;
+      tutRender();
+      return tutEvent('myAction');
+    }
+  }
+}
+
+function tutStartTrick(n) {
+  const st = _tut.st, q = st.trickQueue[n];
+  st.trickNum = n;
+  st.phase = 'PLAYER_ACTIONS';
+  st.trick = {
+    targetPlayerIdx: q.playerIdx, targetSlotIdx: q.slotIdx,
+    // Mesma regra do servidor: começa no Governante, sentido horário.
+    actionOrder: [0, 1, 2, 3].map(k => (st.governorIdx + k) % 4),
+    currentActorIdx: 0,
+    bets: [null, null, null, null], actionTypes: [null, null, null, null],
+    revealed: false, tiedPlayers: [],
+    tieBreakSubmitted: [false, false, false, false], tieBreakCards: [null, null, null, null],
+    waitingForDiscard: -1, discardExcess: 0,
+  };
+}
+
+// Jogadas fixas dos bots na vaza de treino — uma de cada tipo, para
+// mostrar as 3 ações possíveis.
+const TUT_BOT_PLAYS = {
+  1: { msg: n => `A ${n} <strong>apostou 1 carta</strong>, virada para baixo. Só sabes <em>quantas</em> cartas jogou, não o valor — é aqui que entra o bluff!` },
+  2: { msg: n => `O ${n} <strong>passou</strong>: não aposta nesta vaza e compraria 1 carta (já tem 7, o limite, por isso fica igual).` },
+  3: { msg: n => `A ${n} <strong>trocou 2 cartas</strong>: descartou-as à vista e comprou outras 2. Também não aposta nesta vaza.` },
+};
+
+function tutBotTurn(pi) {
+  const st = _tut.st;
+  _tut.busy = true;
+  const stepIdx = _tut.i;
+  _tut.botT = setTimeout(() => {
+    if (!_tut || _tut.i !== stepIdx) return;
+    const t = st.trick, p = st.players[pi];
+    if (pi === 1) {
+      t.bets[1] = [tutCard(2001, activeBaelf(st).color, 6)];
+      t.actionTypes[1] = 'bet';
+      p.handSize--;
+    } else if (pi === 2) {
+      t.bets[2] = []; t.actionTypes[2] = 'pass';
+    } else {
+      t.bets[3] = []; t.actionTypes[3] = 'swap';
+      st.discardSize += 2; st.deckSize = Math.max(0, st.deckSize - 2);
+    }
+    t.currentActorIdx++;
+    _tut.busy = false;
+    _tut.botMsg = TUT_BOT_PLAYS[pi].msg(esc(p.name));
+    playClick();
+    tutRender();
+  }, 1400);
+}
+
+function tutScore(cards, baelf) {
+  let sum = 0, dbl = false;
+  for (const c of cards) {
+    if (c.type === 'numeric') sum += c.value;
+    if (c.type === 'double' && c.color === baelf.color) dbl = true;
+  }
+  return { total: dbl ? sum * 2 : sum, jokerWin: false };
+}
+
+function tutReveal(st) {
+  const t = st.trick, baelf = activeBaelf(st);
+  const scores = st.players.map((_, i) =>
+    t.actionTypes[i] === 'bet' && t.bets[i]?.length ? tutScore(t.bets[i], baelf) : null);
+  let winner = null;
+  scores.forEach((s, i) => { if (s && (winner === null || s.total > scores[winner].total)) winner = i; });
+  baelf.bulbs.push(winner);
+  if (baelf.bulbs.length >= baelf.slots) { baelf.complete = true; st.anyCompletedThisRound = true; }
+  st.discardSize += t.bets.reduce((n, b) => n + (b?.length || 0), 0);
+  t.revealed = true;
+  st.lastTrickResult = {
+    roundNum: st.roundNum, trickNum: st.trickNum,
+    trickTargetPlayerIdx: t.targetPlayerIdx, trickTargetSlotIdx: t.targetSlotIdx,
+    bets: t.bets, actionTypes: t.actionTypes, scores, winner, tied: false, tiedPlayers: [],
+  };
+}
+
+function tutEndRound(st) {
+  st.trick = null; st.trickQueue = null; st.trickNum = 0; st.lastTrickResult = null;
+  // Completas saem do centro e o dono põe outra (aqui escolhida automaticamente).
+  for (const p of st.players) {
+    const bi = p.activeSlots[0];
+    if (bi !== null && p.baelfungious[bi].complete)
+      p.activeSlots[0] = p.baelfungious.findIndex((b, k) => !b.complete && k !== bi);
+  }
+  if (st.anyCompletedThisRound) {
+    st.myHand.push(...tutDraw(7 - st.myHand.length));
+    for (const p of st.players.slice(1)) p.handSize = 7;
+  }
+  st.anyCompletedThisRound = false;
+  st.governorIdx = 1;
+  st.roundNum = 2;
+  st.phase = 'CHOOSE_SEQUENCE';
+}
+
+// ── Helpers de texto ─────────────────────────────────────────
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+}
+function tutName(st, i) { return i === st.myIdx ? 'Tu' : esc(st.players[i].name); }
+function tutColored(st, i, txt) {
+  return `<strong style="color:${COLOR_HEX[st.players[i].color]}">${txt ?? tutName(st, i)}</strong>`;
+}
+function tutBaelfLabel(b) {
+  return `<strong style="color:${COLOR_HEX[b.color]}">${TUT_CNAME[b.color]} ${SYM_ICON[b.symbol]}</strong>`;
+}
+// Fila de chips com a ordem de jogo a partir do Governante; `cur` marca
+// quem está a jogar (posição na ordem) e esbate quem já jogou.
+function tutOrder(st, gov, cur) {
+  const chips = [0, 1, 2, 3].map(k => (gov + k) % 4).map((pi, k) => {
+    const hex = COLOR_HEX[st.players[pi].color];
+    const cls = cur == null ? '' : k === cur ? ' now' : k < cur ? ' done' : '';
+    return (k ? '<span class="tut-arrow">→</span>' : '') +
+      `<span class="tut-chip${cls}" style="color:${hex};border-color:${hex}">${tutName(st, pi)}${pi === gov ? ' 👑' : ''}</span>`;
+  });
+  return `<div class="tut-order">${chips.join('')}</div>`;
+}
+function tutBestBet(st) {
+  const b = activeBaelf(st);
+  const mine = st.myHand.filter(c => cardCanPlay(c, b));
+  if (!mine.length) return '';
+  const { total } = tutScore(mine, b);
+  const dbl = mine.some(c => c.type === 'double');
+  return `<p>💡 Com todas as tuas cartas <strong style="color:${COLOR_HEX[b.color]}">${TUT_CNAME_PL[b.color]}</strong> fazes <strong>${total}</strong>${dbl ? ' (o Duplo ×2 duplica a soma!)' : ''}. Experimenta apostar.</p>`;
+}
+const tutPanel = pi => `#opponents-area .opponent-panel:nth-child(${pi})`;
+
+// ── Passos ───────────────────────────────────────────────────
+// target: seletor(es) a destacar · wait: evento que avança o passo (sem
+// botão "Seguinte") · onEnter: altera o estado de treino ao entrar.
+const TUT_STEPS = [
+  { title: 'Bem-vindo ao Bulbous 🍄',
+    body: () => `<p>Vamos jogar uma <strong>ronda de treino</strong> contra 3 bots — nada aqui conta.</p>
+      <p>A ideia em 10 segundos: cada jogador tem criaturas, as <strong>Baelfungious</strong>. Aposta-se com <strong>Cartas de Charme</strong> para as disputar, e quem aposta mais alto coloca um <strong>bolbo</strong> da sua cor na criatura. No fim, ganha quem somar mais pontos em bolbos e bónus.</p>` },
+
+  { target: '#opponents-area', title: 'Os teus adversários',
+    body: () => `<p>Cada painel é um jogador: o nome na cor dele, quantas cartas tem na mão e as suas 4 Baelfungious em miniatura, com os bolbos já colocados.</p>
+      <p>A miniatura com contorno lilás é a que esse jogador tem ativa no centro da mesa.</p>` },
+
+  { target: '#my-baelfs-row', title: 'As tuas Baelfungious',
+    body: st => `<p>Tu jogas com o ${tutColored(st, 0, 'Azul ⭕')}. Estas são as tuas 4 criaturas: têm <strong>1, 2, 3 ou 4 anéis</strong> para bolbos.</p>
+      <p>Quando todos os anéis estão cheios, fica <strong>completa</strong> — e quem lá tiver mais bolbos ganha pontos extra no fim.</p>` },
+
+  { target: '#my-hand-row', title: 'A tua mão',
+    body: () => `<p>Estas são as tuas <strong>Cartas de Charme</strong> (7 no jogo a 4). Há três tipos:</p>
+      <ul><li><strong>Números 3–9</strong>, cada um de uma cor;</li>
+      <li><strong>Duplo ×2</strong> — duplica a soma, se jogado na Baelfungious da mesma cor;</li>
+      <li><strong>Joker ⭕/▲</strong> — ganha logo a vaza numa Baelfungious do mesmo símbolo.</li></ul>` },
+
+  { target: ['#my-baelfs-row', '#action-bar'], wait: 'CHOOSE_BAELF', title: 'Põe uma criatura em jogo',
+    body: () => `<p>No início, cada jogador empurra <strong>1 Baelfungious</strong> para o centro da mesa. Os bots já escolheram.</p>`,
+    hint: '👉 Clica numa das tuas Baelfungious e depois em Confirmar.' },
+
+  { target: '#centre-area', title: 'A mesa',
+    body: () => `<p>Estão agora <strong>4 Baelfungious ativas</strong> no centro, uma de cada jogador.</p>
+      <p>Uma <strong>ronda</strong> tem 4 <strong>vazas</strong>: em cada vaza disputa-se uma destas cartas e quem ganhar coloca-lhe um bolbo — mesmo que a criatura seja de outro jogador.</p>` },
+
+  { target: '#my-info-row', title: 'Tu és o Governante 👑',
+    body: () => `<p>Em cada ronda há um <strong>Governante</strong> — nesta ronda és tu. O Governante:</p>
+      <ul><li>decide a <strong>ordem</strong> em que as 4 Baelfungious vão ser disputadas;</li>
+      <li>é o <strong>primeiro a jogar</strong> em cada vaza.</li></ul>
+      <p>No fim da ronda, o papel passa ao jogador seguinte.</p>` },
+
+  { target: ['#centre-area', '#action-bar'], wait: 'CHOOSE_SEQUENCE', title: 'Declara a sequência',
+    body: () => `<p>Clica nas 4 Baelfungious pela ordem em que queres disputá-las — aparece 1ª, 2ª, 3ª, 4ª. Clicar outra vez numa carta desfaz.</p>
+      <p>Pensa bem: depois de confirmada, a ordem já não muda nesta ronda.</p>`,
+    hint: '👉 Escolhe as 4 e carrega em Confirmar Sequência.' },
+
+  { target: ['#opponents-area', '#my-info-row'], title: 'A rotação de turnos',
+    body: st => `<p>Em cada vaza, os jogadores agem <strong>um de cada vez</strong>, no sentido dos ponteiros do relógio, <strong>a começar no Governante</strong>:</p>
+      ${tutOrder(st, st.governorIdx, null)}
+      <p>Cada um faz <strong>uma</strong> ação e passa a vez. O painel de quem está a jogar pisca a lilás.</p>` },
+
+  { target: '.baelf-card.contested', title: '1ª vaza',
+    body: st => { const b = activeBaelf(st); return `
+      <p>Disputa-se agora a Baelfungious ${tutBaelfLabel(b)} — a que tem o brilho amarelo e a 👑.</p>
+      <p>Só podes apostar cartas <strong>${TUT_CNAME_PL[b.color]}</strong> (ou o Joker ${SYM_ICON[b.symbol]}). Quando escolheres apostar, as outras cartas ficam esbatidas.</p>`; } },
+
+  { target: ['#action-bar', '#my-hand-row'], wait: 'myAction', title: 'É a tua vez!',
+    body: st => `${tutOrder(st, st.governorIdx, st.trick?.currentActorIdx)}
+      <ul><li>🃏 <strong>Apostar</strong> — joga cartas viradas para baixo; conta a soma dos valores;</li>
+      <li>🔄 <strong>Trocar</strong> — descarta 1 ou 2 cartas e compra outras tantas;</li>
+      <li>⏭ <strong>Passar</strong> — não apostas e compras 1 carta.</li></ul>
+      ${tutBestBet(st)}`,
+    hint: '👉 Escolhe uma ação na barra de baixo.' },
+
+  ...[1, 2, 3].map(pi => ({
+    target: () => tutPanel(pi), bot: true,
+    title: st => `Vez ${pi === 2 ? 'do' : 'da'} ${esc(st.players[pi].name)}`,
+    onEnter: () => tutBotTurn(pi),
+    body: st => `${tutOrder(st, st.governorIdx, st.trick.currentActorIdx)}
+      <p>${_tut.botMsg || `⏳ ${esc(st.players[pi].name)} está a pensar…`}</p>
+      ${_tut.botMsg && pi === 3 ? '<p>Todos jogaram — vamos revelar as apostas!</p>' : ''}`,
+  })),
+
+  { target: '#reveal-overlay .reveal-box', wait: 'revealClosed', title: 'Revelação',
+    onEnter: st => tutReveal(st),
+    body: st => { const lr = st.lastTrickResult;
+      return `<p>Viram-se as cartas e soma-se cada aposta. ${lr.winner === 0 ? '<strong>Ganhaste</strong>' : tutColored(st, lr.winner) + ' ganha'} com <strong>${lr.scores[lr.winner].total}</strong>.</p>
+        <p>Em caso de empate há um desempate: cada empatado pode jogar mais 1 carta da mesma cor.</p>`; },
+    press: { label: 'Continuar →', sel: '#btn-dismiss-reveal' } },
+
+  { target: ['.baelf-card.contested', '#action-bar'], wait: 'recapClosed', title: 'Um bolbo na mesa',
+    body: st => { const lr = st.lastTrickResult, b = activeBaelf(st);
+      return `<p>${lr.winner === 0 ? 'Colocaste' : tutColored(st, lr.winner) + ' colocou'} <strong>1 bolbo</strong> nesta Baelfungious (${b.bulbs.length}/${b.slots}).${b.complete ? ' Ficou <strong>completa</strong>!' : ''}</p>
+        <p>As cartas apostadas vão para o descarte — mesmo as de quem perdeu. Ganhar custa cartas, por isso gere bem a mão.</p>`; },
+    press: { label: 'Continuar →', sel: '#action-bar button', text: 'Continuar' } },
+
+  { target: '#centre-area', title: '2ª vaza',
+    onEnter: st => tutStartTrick(1),
+    body: st => `<p>Segue-se a 2ª Baelfungious da tua sequência (${tutBaelfLabel(activeBaelf(st))}). A ordem de jogo <strong>recomeça no Governante</strong>, igual nas 4 vazas da ronda:</p>
+      ${tutOrder(st, st.governorIdx, 0)}
+      <p>Para poupar tempo, o tutorial salta o resto desta ronda.</p>` },
+
+  { target: () => tutPanel(1), title: 'Nova ronda, novo Governante',
+    onEnter: st => tutEndRound(st),
+    body: st => `<p>Depois das 4 vazas:</p>
+      <ul><li>Baelfungious <strong>completas</strong> saem do centro e o dono põe outra em jogo;</li>
+      <li>quando entra uma Baelfungious nova no centro, <strong>todos reabastecem</strong> a mão até 7 cartas — se nenhuma completou, ninguém compra;</li>
+      <li>o <strong>Governante passa ao jogador seguinte</strong>: agora é ${tutColored(st, 1, esc(st.players[1].name) + ' 👑')}.</li></ul>
+      <p>Na ronda 2 é ela quem declara a ordem, e a rotação passa a ser:</p>
+      ${tutOrder(st, 1, null)}` },
+
+  { title: 'Fim do jogo e pontos',
+    body: () => `<p>O jogo acaba quando alguém põe em jogo a sua <strong>última</strong> Baelfungious: termina-se essa ronda e contam-se os pontos:</p>
+      <ul><li><strong>1 ponto</strong> por cada bolbo que colocaste;</li>
+      <li><strong>+3</strong> por teres a maioria numa Baelfungious completa (<strong>+1</strong> cada, em empate);</li>
+      <li><strong>+5</strong> se tiveres a maioria em completas das 4 cores;</li>
+      <li><strong>+10</strong> se a tiveres nos 4 tipos (1, 2, 3 e 4 anéis).</li></ul>` },
+
+  { title: 'Estás pronto! 🎉', last: true,
+    body: () => `<p>Já sabes o essencial. Algumas dicas:</p>
+      <ul><li>Os outros só veem <em>quantas</em> cartas apostas — muitas cartas baixas também assustam.</li>
+      <li>Às vezes compensa passar e guardar as cartas boas para a vaza certa.</li>
+      <li>Como Governante, usa a ordem a teu favor.</li></ul>
+      <p>Podes rever as regras a qualquer momento em 📖.</p>` },
+];
+
+// ── Balão + spotlight ────────────────────────────────────────
+function tutTargets() {
+  const step = TUT_STEPS[_tut.i];
+  let sel = typeof step.target === 'function' ? step.target() : step.target;
+  if (!sel) return [];
+  if (!Array.isArray(sel)) sel = [sel];
+  return sel.map(s => document.querySelector(s)).filter(e => e && e.offsetParent !== null);
+}
+
+function tutShowStep() {
+  const st = _tut.st, step = TUT_STEPS[_tut.i];
+  const val = v => typeof v === 'function' ? v(st) : v;
+  const box = el('tut-coach');
+  box.innerHTML = '';
+
+  const prog = ce('div', 'tut-progress');
+  const bar  = ce('span');
+  bar.style.width = `${((_tut.i + 1) / TUT_STEPS.length) * 100}%`;
+  prog.appendChild(bar);
+
+  const body = ce('div', 'tut-body');
+  body.innerHTML = val(step.body);
+  box.append(prog, ce('div', 'tut-title', val(step.title)), body);
+  if (step.hint) box.appendChild(ce('div', 'tut-hint', step.hint));
+
+  const actions = ce('div', 'tut-actions');
+  if (!step.last) {
+    const skip = ce('button', 'tut-skip', 'Sair do tutorial');
+    skip.onclick = () => endTutorial(false);
+    actions.appendChild(skip);
+  }
+  if (step.last) {
+    const solo = myName && _lobbies.find(l => l.solo && !l.inGame && l.seated.length < l.maxHumans);
+    if (solo) {
+      actions.appendChild(mkBtn('🤖 Jogar contra a IA', 'btn-confirm', () => {
+        endTutorial(true);
+        myLobbyId = solo.id;
+        send({ type:'JOIN_LOBBY', lobbyId:solo.id, playerName:myName });
+      }));
+    }
+    actions.appendChild(mkBtn('Terminar', solo ? 'btn-cancel' : 'btn-confirm', () => endTutorial(true)));
+  } else if (step.press) {
+    // Atalho no próprio balão para o botão real que o passo espera — o
+    // balão pode tapar esse botão em ecrãs pequenos.
+    actions.appendChild(mkBtn(step.press.label, 'btn-confirm', () => {
+      const b = [...document.querySelectorAll(step.press.sel)].find(x => x.textContent.includes(step.press.text || ''));
+      if (b) b.click();
+    }));
+  } else if (!step.wait) {
+    const next = mkBtn(step.bot && _tut.busy ? '⏳' : 'Seguinte →', 'btn-confirm', () => tutGo(_tut.i + 1));
+    next.disabled = !!(step.bot && _tut.busy);
+    actions.appendChild(next);
+  }
+  box.appendChild(actions);
+  box.classList.add('show');
+  tutPlace();
+}
+
+// Recalculado a cada render e periodicamente (o layout mexe-se com
+// hovers, scroll da área de baixo, resize…).
+function tutPlace() {
+  if (!_tut) return;
+  const box = el('tut-coach'), spot = el('tut-spot');
+  const targets = tutTargets();
+  const vw = window.innerWidth, vh = window.innerHeight, pad = 6, gap = 12;
+
+  if (!targets.length) {
+    // Sem alvo: escurece tudo por igual e centra o balão.
+    Object.assign(spot.style, { top: vh / 2 + 'px', left: vw / 2 + 'px', width: '0px', height: '0px' });
+    spot.classList.add('show');
+    box.classList.add('center');
+    box.style.top = '';
+    return;
+  }
+
+  const rs = targets.map(t => t.getBoundingClientRect());
+  const r = {
+    top:    Math.max(0,  Math.min(...rs.map(x => x.top))    - pad),
+    left:   Math.max(0,  Math.min(...rs.map(x => x.left))   - pad),
+    bottom: Math.min(vh, Math.max(...rs.map(x => x.bottom)) + pad),
+    right:  Math.min(vw, Math.max(...rs.map(x => x.right))  + pad),
+  };
+  Object.assign(spot.style, {
+    top: r.top + 'px', left: r.left + 'px',
+    width: (r.right - r.left) + 'px', height: (r.bottom - r.top) + 'px',
+  });
+  spot.classList.add('show');
+
+  box.classList.remove('center');
+  const h = box.offsetHeight;
+  let top;
+  if (vh - r.bottom >= h + gap * 2)  top = r.bottom + gap;       // cabe por baixo
+  else if (r.top >= h + gap * 2)     top = r.top - h - gap;      // cabe por cima
+  else top = (r.top > vh - r.bottom) ? gap : vh - h - gap;       // encosta ao lado com mais espaço
+  box.style.top = Math.max(gap, top) + 'px';
+}
+window.addEventListener('resize', tutPlace);
+
+el('btn-tut-lobby').onclick = startTutorial;
+el('btn-tut-name').onclick  = startTutorial;
 
 // ══════════════════════════════════════════════════════════════
 // SERVICE WORKER + BOOT

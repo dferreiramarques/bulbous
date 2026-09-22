@@ -35,7 +35,7 @@ Bulbous tem 3 modos: **2 jogadores**, **4 jogadores**, e **4 jogadores cooperati
 
 ### Fim da ronda
 
-"Se alguma criatura ficou cheia, vai para a área de quem a trouxe, e essa pessoa escolhe outra das suas cartas restantes para pôr no centro. Enchem a mão outra vez até 9 cartas. Quem decidiu a ordem nesta ronda recupera o Bolbo de Ronda, e é o outro jogador que decide a ordem da próxima."
+"Se alguma criatura ficou cheia, vai para a área de quem a trouxe, e essa pessoa escolhe outra das suas cartas restantes para pôr no centro. Se entrou uma criatura nova no centro, enchem a mão outra vez até 9 cartas — se nenhuma ficou cheia, ninguém compra. Quem decidiu a ordem nesta ronda recupera o Bolbo de Ronda, e é o outro jogador que decide a ordem da próxima."
 
 ### Como se ganha
 
@@ -44,7 +44,7 @@ Bulbous tem 3 modos: **2 jogadores**, **4 jogadores**, e **4 jogadores cooperati
 - "Cada bolbo que puseste vale 1 ponto."
 - "Se tiveres mais bolbos do que o outro jogador numa criatura já cheia, ganhas +3."
 - "Se empatarem no máximo, cada um ganha +1."
-- "Se completares pelo menos uma criatura de cada cor do teu símbolo, +5. Se completares uma de cada tipo (4 tipos), +10."
+- "Se tiveres a maioria em criaturas cheias das 4 cores, +5. Se a tiveres em criaturas cheias dos 4 tipos, +10. Um empate na maioria também conta."
 - "Quem tiver mais pontos, ganha."
 
 ---
@@ -74,7 +74,7 @@ Bulbous tem 3 modos: **2 jogadores**, **4 jogadores**, e **4 jogadores cooperati
 
 ### Fim da ronda
 
-"Se alguma criatura ficou cheia, vai para a área de quem a trouxe, e essa pessoa escolhe outra das suas cartas para pôr no centro. Todos enchem a mão outra vez até 7 cartas. O Governante passa a vez ao jogador à esquerda, que fica com o Bolbo de Ronda dele para a próxima ronda."
+"Se alguma criatura ficou cheia, vai para a área de quem a trouxe, e essa pessoa escolhe outra das suas cartas para pôr no centro. Se entrou uma criatura nova no centro, todos enchem a mão outra vez até 7 cartas — se nenhuma ficou cheia, ninguém compra. O Governante passa a vez ao jogador à esquerda, que fica com o Bolbo de Ronda dele para a próxima ronda."
 
 ### Como se ganha
 
@@ -83,7 +83,7 @@ Bulbous tem 3 modos: **2 jogadores**, **4 jogadores**, e **4 jogadores cooperati
 - "Cada bolbo que puseste vale 1 ponto."
 - "Se tiveres mais bolbos do que ninguém numa criatura já cheia, ganhas +3."
 - "Se empatarem no máximo, cada um dos empatados ganha +1."
-- "Se completares pelo menos uma criatura de cada cor, +5. Se completares uma de cada tipo (4 tipos), +10."
+- "Se tiveres a maioria em criaturas cheias das 4 cores, +5. Se a tiveres em criaturas cheias dos 4 tipos, +10. Um empate na maioria também conta."
 - "Quem tiver mais pontos no total, ganha."
 
 ---

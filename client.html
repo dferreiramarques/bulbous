@@ -147,7 +147,7 @@ input  { font: inherit; }
    possível e evitar scroll interno com muitas mesas. */
 #screen-lobby {
   align-items: center; justify-content: flex-start; background: var(--bg); padding: 24px;
-  padding-top: max(24px, env(safe-area-inset-top)); padding-bottom: max(24px, env(safe-area-inset-bottom));
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
 }
 .lobby-container {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
@@ -204,10 +204,8 @@ input  { font: inherit; }
   padding: 10px 18px; border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 14px; flex-shrink: 0;
   background: var(--surface); min-height: 52px;
-  padding-top: max(10px, env(safe-area-inset-top));
-  padding-left: max(18px, env(safe-area-inset-left));
-  padding-right: max(18px, env(safe-area-inset-right));
 }
+.hdr-ico { display: none; }
 .hdr-phase { flex: 1; font-family: var(--font-display); font-size: 1.1rem; color: var(--accent); font-weight: 700; letter-spacing: .03em; }
 .hdr-info  { color: var(--muted); font-size: .92rem; }
 #btn-rules-game { padding: 3px 8px; font-size: .72rem; }
@@ -590,7 +588,7 @@ input  { font: inherit; }
 
 /* Refill banner */
 #refill-banner {
-  display: none; position: fixed; top: calc(env(safe-area-inset-top) + 50px); left: 50%; transform: translateX(-50%);
+  display: none; position: fixed; top: 50px; left: 50%; transform: translateX(-50%);
   background: var(--green-dim); border: 1px solid var(--green); color: var(--green);
   padding: 8px 20px; border-radius: var(--radius-pill); font-size: .82rem; font-weight: 600;
   z-index: 400; animation: fadeInOut 2.8s forwards;
@@ -717,81 +715,116 @@ input  { font: inherit; }
 }
 
 /* ═══════════════════════════════════════════════════════
-   TELEMÓVEL NA HORIZONTAL — 2 colunas
-   Com ~390px de altura, empilhar adversários / mesa / a minha área
-   deixava a mesa com 0px. Aqui a mesa e os adversários ficam à
-   esquerda e a minha área (Baelfungious, ações, mão) numa coluna à
-   direita, com a altura toda do ecrã.
+   ECRÃ INTEIRO / APP INSTALADA (html.edge, ver syncEdge)
+   Só quando a página ocupa o ecrã todo é que o notch e a barra de
+   estado lhe tapam conteúdo. No browser normal o browser já os
+   reserva — aplicar as margens aí só criava faixas vazias.
 ═══════════════════════════════════════════════════════ */
-@media (orientation: landscape) and (max-height: 500px) {
-  :root {
-    --card-w: 60px;  --card-h: 84px;
-    --my-baelf-w: 42px;
-  }
-  #screen-game.active {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 40%);
-    grid-template-rows: auto auto minmax(0, 1fr);
-    grid-template-areas: "header header" "opps my" "centre my";
-    padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
-  }
-  #game-header { grid-area: header; min-height: 0; padding: 4px 12px; padding-top: max(4px, env(safe-area-inset-top)); gap: 10px; }
-  .hdr-phase { font-size: .95rem; }
-  .hdr-info  { font-size: .8rem; }
-  #game-header .btn-ghost, #btn-leave { min-height: 36px; padding-top: 0; padding-bottom: 0; }
+html.edge #game-header {
+  padding-top: max(4px, env(safe-area-inset-top));
+  padding-left: max(10px, env(safe-area-inset-left));
+  padding-right: max(10px, env(safe-area-inset-right));
+}
+html.edge #screen-lobby { padding-top: max(24px, env(safe-area-inset-top)); }
+html.edge #refill-banner { top: calc(env(safe-area-inset-top) + 50px); }
 
-  /* Adversários: grelha de colunas iguais, painel compacto */
+/* ═══════════════════════════════════════════════════════
+   COMPACTO — telemóvel, vertical ou deitado (= COMPACT_MQ no JS)
+   Menos moldura e menos texto: o ecrã é para a mesa e para a mão.
+═══════════════════════════════════════════════════════ */
+@media (max-width: 640px), (orientation: landscape) and (max-height: 500px) {
+  :root { --card-w: 64px; --card-h: 90px; }
+
+  /* Cabeçalho numa linha: fase/vaza · ronda · baralho · ⛶ 📖 ✕ */
+  #game-header { min-height: 0; padding: 4px 8px; gap: 8px; }
+  .hdr-phase { font-size: .95rem; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hdr-info  { font-size: .75rem; white-space: nowrap; }
+  #hdr-deck  { margin-left: 0 !important; }
+  .hdr-lbl { display: none; }
+  .hdr-ico { display: inline; }
+  #game-header .btn-ghost, #btn-leave {
+    min-height: 34px; min-width: 34px; padding: 0 6px; font-size: .9rem;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+
+  /* Adversários: colunas iguais, sem scroll; painel de 3 linhas curtas */
   #opponents-area {
-    grid-area: opps; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
-    gap: 6px; padding: 6px 8px; overflow: visible;
+    display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
+    gap: 5px; padding: 5px 6px; overflow: visible;
   }
   #opponents-area > .opponent-panel { margin: 0; }
   .opponent-panel {
-    min-width: 0; padding: 4px 7px; gap: 1px 6px;
-    display: grid; grid-template-columns: auto minmax(0, 1fr);
-    grid-template-areas: "name name" "meta action" "baelfs baelfs";
+    min-width: 0; padding: 3px 6px 4px; gap: 1px 4px; border-width: 1.5px;
+    display: grid; grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "name meta" "action action" "baelfs baelfs";
   }
-  .opp-name   { grid-area: name; font-size: .8rem; }
-  .opp-meta   { grid-area: meta; font-size: .7rem; }
-  .opp-action { grid-area: action; font-size: .72rem; min-height: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
-  /* No resumo da vaza o resultado é a informação principal: linha própria */
-  .opp-action.recap { grid-column: 1 / -1; text-align: center; padding: 0 4px; margin: 1px 0 0; }
-  /* o vencedor vem com font-size inline maior (renderOpponents); aqui não cabe — cor e 🏆 chegam */
-  .opp-action { font-size: .8rem !important; }
+  .opp-name   { grid-area: name; font-size: .78rem; }
+  .opp-meta   { grid-area: meta; font-size: .72rem; }
+  .opp-action { grid-area: action; font-size: .72rem !important; min-height: 1.1em; line-height: 1.1;
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .opp-action.recap { text-align: center; padding: 0 4px; margin: 0; }
   .opp-baelfs { grid-area: baelfs; flex-wrap: nowrap; gap: 3px; margin-top: 2px; }
   .mini-baelf { width: auto; flex: 1 1 0; min-width: 0; max-width: 64px; height: 18px; padding: 1px 3px; }
   .mini-slot-dot { width: 5px; height: 5px; }
   .mini-count { display: none; }
 
-  /* Mesa: as 4 Baelfungious numa só fila, com o tamanho a sair do
-     espaço que a célula da grelha tem de facto (container units). */
-  #centre-area {
-    grid-area: centre; container-type: size;
-    flex-wrap: nowrap; gap: 10px; padding: 6px 10px; overflow: hidden;
-  }
+  /* Mesa: as 4 Baelfungious numa só fila (a ordem declarada, 1ª→4ª),
+     com o tamanho a sair do espaço que a mesa tem de facto. */
+  #centre-area { container-type: size; flex-wrap: nowrap; gap: 10px; padding: 6px 10px; overflow: hidden; }
   #centre-area .baelf-card {
     --cw: min(calc((100cqw - 30px) / 4), calc((100cqh - 34px) * 9 / 15));
     width: var(--cw); height: calc(var(--cw) * 15 / 9);
   }
   #centre-area .owner-label { max-width: calc((100cqw - 30px) / 4); font-size: .7rem; }
+  .active-baelf-slot { gap: 1px; }
   .seq-badge { top: 16px; right: 4px; min-width: 24px; height: 24px; font-size: .85rem; }
 
-  /* A minha área: coluna da direita, altura toda */
-  #my-area {
-    grid-area: my; max-height: none; min-height: 0;
-    border-top: 0; border-left: 1px solid var(--border);
-    gap: 5px; padding: 6px 10px; padding-bottom: max(6px, env(safe-area-inset-bottom));
-    justify-content: center;
-  }
-  #my-status { font-size: .78rem; }
-  #my-name-badge { font-size: .8rem; padding: 1px 8px; }
+  /* A minha área: sem teto de altura e sem filas espremidas */
+  #my-area { max-height: none; gap: 5px; padding: 6px 10px; padding-bottom: max(6px, env(safe-area-inset-bottom)); }
+  #my-area > * { flex-shrink: 0; }
+  #my-name-badge { display: none; }
+  #my-status { font-size: .8rem; line-height: 1.25; }
+  #my-status.recap { font-size: .85rem; padding: 2px 10px; }
+  #hand-label { display: none; }
+  #my-baelfs-row.mini { gap: 4px; }
+  #my-baelfs-row.mini .mini-baelf { height: 20px; max-width: 72px; }
   .my-baelf-tag { font-size: .58rem; }
-  #action-bar { gap: 6px; flex-wrap: nowrap; }
-  #action-bar .btn-action { padding: 0 8px; font-size: .82rem; flex: 1 1 auto; min-height: 40px; white-space: nowrap; }
-  #my-hand-row { padding-top: 10px; min-height: calc(var(--card-h) + 16px); gap: 5px; }
+  #action-bar { flex-wrap: nowrap; gap: 6px; }
+  #action-bar .btn-action { flex: 1 1 auto; min-width: 0; padding: 0 6px; min-height: 42px; font-size: .85rem; white-space: nowrap; }
+  #my-hand-row { padding-top: 10px; padding-bottom: 2px; min-height: calc(var(--card-h) + 14px); gap: 5px; }
   .hand-toggle { width: 44px; }
   .charm-top { font-size: .95rem; }
   .charm-mid { font-size: 1.4rem; }
+}
+
+/* Vertical: a mesa é limitada pela largura (4 cartas lado a lado), por
+   isso a altura que sobra vai para cartas da mão um pouco maiores. */
+@media (max-width: 640px) and (orientation: portrait) {
+  :root { --card-w: 74px; --card-h: 104px; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   TELEMÓVEL NA HORIZONTAL — 2 colunas
+   Com ~300–390px de altura não dá para empilhar: mesa e adversários
+   à esquerda, a minha área (Baelfungious, ações, mão) à direita.
+═══════════════════════════════════════════════════════ */
+@media (orientation: landscape) and (max-height: 500px) {
+  :root { --card-w: 58px; --card-h: 81px; }
+  #screen-game.active {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 38%);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas: "header header" "opps my" "centre my";
+  }
+  html.edge #screen-game.active { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+  #game-header    { grid-area: header; padding-top: 2px; padding-bottom: 2px; }
+  #opponents-area { grid-area: opps; }
+  #centre-area    { grid-area: centre; }
+  #my-area {
+    grid-area: my; min-height: 0; overflow-y: auto;
+    border-top: 0; border-left: 1px solid var(--border);
+    justify-content: center;
+  }
 }
 </style>
 </head>
@@ -1032,8 +1065,9 @@ input  { font: inherit; }
     <span class="hdr-phase" id="hdr-phase">—</span>
     <span class="hdr-info"  id="hdr-round"></span>
     <span class="hdr-info"  id="hdr-deck" style="margin-left:8px"></span>
-    <button class="btn-ghost" id="btn-rules-game">📖 Regras</button>
-    <button id="btn-leave">Sair</button>
+    <button class="btn-ghost" id="btn-fullscreen" hidden aria-label="Ecrã inteiro" title="Ecrã inteiro">⛶</button>
+    <button class="btn-ghost" id="btn-rules-game" aria-label="Regras">📖<span class="hdr-lbl"> Regras</span></button>
+    <button id="btn-leave" aria-label="Sair"><span class="hdr-ico">✕</span><span class="hdr-lbl">Sair</span></button>
   </div>
   <div id="opponents-area"></div>
   <div id="centre-area"></div>
@@ -1118,6 +1152,11 @@ const COLOR_HEX = { red:'#e63946', blue:'#3a86ff', green:'#43aa8b', yellow:'#f4c
 const COLOR_DIM = { red:'#3a0c10', blue:'#0f2040', green:'#0d2e24', yellow:'#3a2a08' };
 const SYM_ICON  = { circle:'⭕', triangle:'▲' };
 const SCREENS   = ['screen-name','screen-lobby','screen-waiting','screen-game'];
+// Telemóvel (vertical ou deitado): tem de bater certo com as media
+// queries "COMPACTO" no CSS. Aqui decide o que o JS desenha (miniaturas
+// em vez de cartas grandes, textos mais curtos).
+const COMPACT_MQ = window.matchMedia('(max-width: 640px), (orientation: landscape) and (max-height: 500px)');
+const isCompact  = () => COMPACT_MQ.matches;
 
 // ══════════════════════════════════════════════════════════════
 // CLIENT STATE
@@ -1495,6 +1534,9 @@ function renderGame(st) {
     TIE_BREAK:           '⚔️ Desempate',
     GAME_OVER:           'Fim de Jogo',
   };
+  // Em telemóvel o "BULBOUS" durante as vazas não diz nada — mostra a vaza
+  if (isCompact() && st.phase === 'PLAYER_ACTIONS')
+    phaseLabels.PLAYER_ACTIONS = `Vaza ${st.trickNum + 1}/${st.trickQueue?.length || 4}`;
   el('hdr-phase').textContent = phaseLabels[st.phase] || st.phase;
   el('hdr-round').textContent = `Ronda ${st.roundNum}`;
 
@@ -1630,9 +1672,10 @@ function renderOpponents(st) {
     const nameEl = ce('div','opp-name', p.name + (isGov?' 👑':'') + (p.isBot?' 🤖':''));
     nameEl.style.color = COLOR_HEX[p.color] || '#aaa';
 
-    const meta = ce('div','opp-meta', `🂠 ${p.handSize} carta${p.handSize !== 1 ? 's' : ''}`);
+    const meta = ce('div','opp-meta', isCompact() ? `🂠${p.handSize}` : `🂠 ${p.handSize} carta${p.handSize !== 1 ? 's' : ''}`);
 
-    const { text, color } = oppActionInfo(st, i);
+    let { text, color } = oppActionInfo(st, i);
+    if (isCompact() && text === '— aguarda —') text = '';   // ruído num ecrã pequeno
     const actionEl = ce('div','opp-action' + (_recapOpen ? ' recap' : ''), text);
     actionEl.style.color = color;
     // Make winning score big & bright
@@ -1751,6 +1794,17 @@ function renderMyBaelfs(st) {
   const activeColors = me.activeSlots.length > 1
     ? new Set([...aset].map(bi => me.baelfungious[bi].color))
     : new Set();
+
+  // Telemóvel: fora da fase de escolha, as minhas Baelfungious são só uma
+  // faixa de miniaturas (como as dos adversários) — as cartas grandes
+  // comiam metade do ecrã sem serem precisas para jogar a vaza.
+  if (isCompact() && !myPending) {
+    row.classList.add('mini');
+    for (let bi = 0; bi < me.baelfungious.length; bi++)
+      row.appendChild(mkMiniBaelf(me.baelfungious[bi], aset.has(bi)));
+    return;
+  }
+  row.classList.remove('mini');
 
   for (let bi = 0; bi < me.baelfungious.length; bi++) {
     const baelf    = me.baelfungious[bi];
@@ -2439,6 +2493,36 @@ function isPwaInstalled() {
   return window.matchMedia('(display-mode: standalone)').matches ||
          window.navigator.standalone === true;
 }
+
+// ── Ecrã inteiro ──────────────────────────────────────────────
+// Esconde a barra do browser (Android; no iPhone só instalando a app —
+// lá não existe requestFullscreen para páginas). Entra sozinho no toque
+// que abre uma mesa/tutorial num ecrã tátil, e há um botão ⛶ no jogo.
+const canFullscreen = () => !!document.documentElement.requestFullscreen && document.fullscreenEnabled && !isPwaInstalled();
+function goFullscreen() {
+  if (!canFullscreen() || document.fullscreenElement) return;
+  document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+}
+function syncEdge() {
+  // html.edge = a página ocupa o ecrã todo (app instalada ou ecrã
+  // inteiro): só aí é que as margens de notch/barra de estado fazem
+  // falta. No browser normal é o próprio browser que as reserva.
+  document.documentElement.classList.toggle('edge', isPwaInstalled() || !!document.fullscreenElement);
+  el('btn-fullscreen').hidden = !canFullscreen() || !isCompact();
+  el('btn-fullscreen').textContent = document.fullscreenElement ? '🗗' : '⛶';
+}
+el('btn-fullscreen').onclick = () => {
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  else goFullscreen();
+};
+document.addEventListener('fullscreenchange', syncEdge);
+document.addEventListener('click', e => {
+  if (window.matchMedia('(pointer: coarse)').matches &&
+      e.target.closest('.table-btn, #btn-start, #btn-tut-name, #btn-tut-lobby, #btn-play-again'))
+    goFullscreen();
+}, true);
+syncEdge();
+COMPACT_MQ.addEventListener('change', () => { syncEdge(); if (_gs && el('screen-game').classList.contains('active')) renderGame(_gs); });
 
 el('btn-pwa-install').onclick = async () => {
   if (!_deferredInstall) return;

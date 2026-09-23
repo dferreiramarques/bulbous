@@ -2,7 +2,7 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0d0d1a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -66,7 +66,11 @@
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 16px; }
-button { cursor: pointer; border: none; font: inherit; }
+/* dvh = altura visível real (sem a barra de endereço do browser móvel);
+   100% fica como fallback para browsers sem suporte. */
+@supports (height: 100dvh) { html, body { height: 100dvh; } }
+body { -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
+button { cursor: pointer; border: none; font: inherit; touch-action: manipulation; }
 input  { font: inherit; }
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -82,7 +86,7 @@ input  { font: inherit; }
    TOAST
 ═══════════════════════════════════════════════════════ */
 #toast {
-  position: fixed; bottom: 20px; left: 50%;
+  position: fixed; bottom: calc(20px + env(safe-area-inset-bottom)); left: 50%;
   transform: translateX(-50%) translateY(80px);
   background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 10px 20px;
   border-radius: var(--radius-pill); font-size: 13px; z-index: 9999;
@@ -99,14 +103,12 @@ input  { font: inherit; }
   padding: 12px; border-radius: var(--radius-pill); background: var(--accent);
   color: #0d0d1a; font-family: var(--font-display); font-weight: 700; font-size: 1rem; letter-spacing: .02em; transition: opacity .15s;
 }
-.btn-primary:hover { opacity: .85; }
 .btn-ghost {
   padding: 8px 14px; border-radius: var(--radius-pill); background: transparent;
   border: 1px solid var(--border); color: var(--muted);
   font-family: var(--font-display); font-weight: 600;
   transition: border-color .15s, color .15s;
 }
-.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 .btn-action {
   padding: 10px 20px; border-radius: var(--radius-sm); font-family: var(--font-display); font-weight: 600; font-size: .95rem;
   transition: opacity .15s, transform .1s; border: 1px solid transparent;
@@ -143,10 +145,13 @@ input  { font: inherit; }
    barra + lista a ocupar o ecrã todo de lado a lado. Encostado ao topo
    (não centrado no eixo vertical) para dar à lista o máximo de altura
    possível e evitar scroll interno com muitas mesas. */
-#screen-lobby { align-items: center; justify-content: flex-start; background: var(--bg); padding: 24px; }
+#screen-lobby {
+  align-items: center; justify-content: flex-start; background: var(--bg); padding: 24px;
+  padding-top: max(24px, env(safe-area-inset-top)); padding-bottom: max(24px, env(safe-area-inset-bottom));
+}
 .lobby-container {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
-  width: min(560px, 100%); max-height: calc(100vh - 48px);
+  width: min(560px, 100%); max-height: calc(100vh - 48px); max-height: calc(100dvh - 48px);
   display: flex; flex-direction: column; overflow: hidden;
   box-shadow: var(--shadow-card-hover);
 }
@@ -162,7 +167,6 @@ input  { font: inherit; }
   padding: 16px 20px; display: flex; align-items: center; gap: 14px;
   transition: border-color .15s;
 }
-.table-row:hover { border-color: var(--accent); }
 .table-info { flex: 1; }
 .table-info strong { display: block; margin-bottom: 3px; font-size: 1rem; }
 .table-info small  { color: var(--muted); font-size: .85rem; }
@@ -200,16 +204,19 @@ input  { font: inherit; }
   padding: 10px 18px; border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 14px; flex-shrink: 0;
   background: var(--surface); min-height: 52px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-left: max(18px, env(safe-area-inset-left));
+  padding-right: max(18px, env(safe-area-inset-right));
 }
 .hdr-phase { flex: 1; font-family: var(--font-display); font-size: 1.1rem; color: var(--accent); font-weight: 700; letter-spacing: .03em; }
 .hdr-info  { color: var(--muted); font-size: .92rem; }
+#btn-rules-game { padding: 3px 8px; font-size: .72rem; }
 #btn-leave { padding: 7px 16px; font-family: var(--font-display); font-weight: 600; font-size: .88rem; border-radius: var(--radius-sm); background: transparent; border: 1px solid var(--border); color: var(--muted); }
 
 /* Opponents strip */
 #opponents-area {
   display: flex; gap: 10px; padding: 10px 16px; flex-shrink: 0;
   overflow-x: auto; overflow-y: visible; border-bottom: 1px solid var(--border); background: var(--surface);
-  justify-content: center;
 }
 .opponent-panel {
   display: flex; flex-direction: column; gap: 3px; min-width: 155px;
@@ -247,6 +254,7 @@ input  { font: inherit; }
 /* Centre */
 #centre-area {
   flex: 1; display: flex; align-items: center; justify-content: center;
+  justify-content: safe center; align-content: safe center;
   gap: 18px; padding: 12px 16px; overflow-y: auto; flex-wrap: wrap; min-height: 0;
 }
 .active-baelf-slot {
@@ -284,7 +292,6 @@ input  { font: inherit; }
   transition: border-color .2s, transform .15s, box-shadow .2s, z-index 0s;
 }
 .baelf-card.clickable { cursor: pointer; }
-.baelf-card.clickable:hover { transform: translateY(-6px); box-shadow: var(--shadow-card-hover); z-index: 30; position: relative; }
 .baelf-card.selected  { border-color: var(--accent) !important; box-shadow: 0 0 16px var(--accent); z-index: 30; position: relative; transform: translateY(-4px); }
 .baelf-card.contested {
   border-color: var(--yellow) !important;
@@ -356,7 +363,6 @@ input  { font: inherit; }
   transition: border-color .15s, transform .15s, box-shadow .15s;
 }
 .charm-card.clickable { cursor: pointer; }
-.charm-card.clickable:hover { transform: translateY(-7px); box-shadow: var(--shadow-card); z-index: 20; }
 .charm-card.selected { border-color: var(--accent) !important; box-shadow: 0 0 10px var(--accent); transform: translateY(-9px); z-index: 20; }
 .charm-card.invalid  { opacity: .3; cursor: not-allowed; }
 .charm-top   { font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; line-height: 1; }
@@ -367,7 +373,8 @@ input  { font: inherit; }
 #my-area {
   border-top: 1px solid var(--border); background: var(--surface);
   flex-shrink: 0; display: flex; flex-direction: column;
-  gap: 8px; padding: 10px 16px; max-height: 52vh; overflow-y: auto;
+  gap: 8px; padding: 10px 16px; max-height: 52vh; max-height: 52dvh; overflow-y: auto;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
 }
 #my-info-row   { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; width: 100%; }
 #my-name-badge {
@@ -379,7 +386,7 @@ input  { font: inherit; }
   background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
   padding: 3px 10px; font-weight: 600; font-size: .9rem;
 }
-#my-baelfs-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; justify-content: center; overflow-y: visible; }
+#my-baelfs-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; overflow-y: visible; }
 .my-baelf-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .my-baelf-tag  { font-size: .65rem; color: var(--muted); white-space: nowrap; }
 #action-bar    { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center; }
@@ -389,8 +396,15 @@ input  { font: inherit; }
   padding-top: 16px;
   min-height: calc(var(--card-h) + 26px);
   position: relative; z-index: 1;
-  justify-content: center;
 }
+/* Filas com scroll horizontal: centradas com margens automáticas em vez
+   de justify-content:center. Com center, quando o conteúdo é mais largo
+   que a fila, transborda para os DOIS lados e o lado esquerdo fica
+   inalcançável pelo scroll (1.º adversário / 1.ª carta cortados em
+   telemóvel). As margens auto centram quando cabe e encostam à esquerda
+   quando não cabe. */
+#opponents-area > :first-child, #my-baelfs-row > :first-child, #my-hand-row > :first-child { margin-left: auto; }
+#opponents-area > :last-child,  #my-baelfs-row > :last-child,  #my-hand-row > :last-child  { margin-right: auto; }
 
 /* ═══════════════════════════════════════════════════════
    OVERLAYS
@@ -519,7 +533,7 @@ input  { font: inherit; }
   display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 800;
   background: linear-gradient(135deg, #1f1f38, #2a1a4a);
   border-top: 1px solid var(--accent);
-  padding: 14px 20px 18px; /* extra bottom for home-indicator bar */
+  padding: 14px 20px calc(18px + env(safe-area-inset-bottom)); /* extra bottom for home-indicator bar */
   display: flex; align-items: center; gap: 14px;
   animation: slideUp .35s ease;
 }
@@ -552,7 +566,7 @@ input  { font: inherit; }
 #ios-install-sheet.show { display: flex; }
 .ios-sheet-box {
   background: var(--surface2); border: 1px solid var(--border);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 24px 24px 36px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 24px 24px calc(36px + env(safe-area-inset-bottom));
   width: 100%; max-width: 480px; text-align: center;
   animation: slideUp .3s ease;
 }
@@ -576,16 +590,16 @@ input  { font: inherit; }
 
 /* Refill banner */
 #refill-banner {
-  display: none; position: fixed; top: 50px; left: 50%; transform: translateX(-50%);
+  display: none; position: fixed; top: calc(env(safe-area-inset-top) + 50px); left: 50%; transform: translateX(-50%);
   background: var(--green-dim); border: 1px solid var(--green); color: var(--green);
   padding: 8px 20px; border-radius: var(--radius-pill); font-size: .82rem; font-weight: 600;
   z-index: 400; animation: fadeInOut 2.8s forwards;
 }
 @keyframes fadeInOut {
-  0%   { opacity: 0; top: 40px; }
-  15%  { opacity: 1; top: 50px; }
-  75%  { opacity: 1; top: 50px; }
-  100% { opacity: 0; top: 40px; }
+  0%   { opacity: 0; transform: translate(-50%, -10px); }
+  15%  { opacity: 1; transform: translate(-50%, 0); }
+  75%  { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -10px); }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -602,7 +616,7 @@ input  { font: inherit; }
 #tut-spot.show { display: block; }
 #tut-coach {
   display: none; position: fixed; z-index: 660; left: 50%; transform: translateX(-50%);
-  width: min(420px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow-y: auto;
+  width: min(420px, calc(100vw - 24px)); max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); overflow-y: auto;
   background: var(--surface2); border: 1px solid var(--accent); border-radius: var(--radius-md);
   padding: 16px 18px; box-shadow: var(--shadow-card-hover);
   flex-direction: column; gap: 10px;
@@ -626,7 +640,159 @@ input  { font: inherit; }
 .tut-hint { font-size: .82rem; color: var(--yellow); font-weight: 600; }
 .tut-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .tut-skip { margin-right: auto; background: transparent; color: var(--muted); font-size: .8rem; text-decoration: underline; padding: 4px 0; }
-.tut-skip:hover { color: var(--text); }
+
+/* ═══════════════════════════════════════════════════════
+   MÃO COLAPSÁVEL
+   Durante uma vaza a mão mostra só as cartas que se podem apostar na
+   Baelfungious em disputa; as restantes ficam atrás do botão "+N",
+   que expande a mão toda (ver renderHand).
+═══════════════════════════════════════════════════════ */
+.hand-toggle {
+  width: 52px; height: var(--card-h); flex-shrink: 0;
+  border-radius: var(--radius-sm); border: 2px dashed var(--border);
+  background: transparent; color: var(--muted);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font-family: var(--font-display); font-weight: 700; line-height: 1.1;
+  transition: border-color .15s, color .15s;
+}
+.hand-toggle b     { font-size: 1.15rem; }
+.hand-toggle small { font-size: .62rem; font-weight: 600; font-family: var(--font-body); }
+.hand-toggle:active { border-color: var(--accent); color: var(--accent); }
+.hand-toggle.wide  { width: auto; padding: 0 14px; }
+.charm-card.unplayable { opacity: .45; }
+.charm-card.hand-in { animation: handIn .18s ease; }
+@keyframes handIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; } }
+#hand-label b { color: var(--text); font-weight: 600; }
+
+/* ═══════════════════════════════════════════════════════
+   TOQUE vs RATO
+   Efeitos de hover só em dispositivos que fazem mesmo hover — num ecrã
+   tátil o :hover fica "preso" depois do toque (carta levantada, botão
+   aceso) até se tocar noutro sítio.
+═══════════════════════════════════════════════════════ */
+@media (hover: hover) {
+  .btn-primary:hover { opacity: .85; }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .table-row:hover { border-color: var(--accent); }
+  .baelf-card.clickable:hover { transform: translateY(-6px); box-shadow: var(--shadow-card-hover); z-index: 30; position: relative; }
+  .charm-card.clickable:hover { transform: translateY(-7px); box-shadow: var(--shadow-card); z-index: 20; }
+  .tut-skip:hover { color: var(--text); }
+  .hand-toggle:hover { border-color: var(--accent); color: var(--accent); }
+}
+/* Alvos de toque com pelo menos 44px (recomendação iOS/Android). */
+@media (pointer: coarse) {
+  .btn-action, .btn-ghost, .btn-primary, .table-btn, .btn-dismiss,
+  #btn-leave, #btn-rules-game, .btn-close-rules, .rules-tab { min-height: 44px; }
+  .tut-skip { min-height: 44px; }
+  .baelf-card.clickable, .charm-card.clickable { touch-action: manipulation; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   TELEMÓVEL — ajustes transversais (o layout do ecrã de jogo em si
+   é tratado à parte)
+═══════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* Lobby: menos moldura à volta, para as mesas não partirem em 3 linhas */
+  #screen-lobby { padding-left: 12px; padding-right: 12px; }
+  .lobby-header { padding: 14px 16px; }
+  .lobby-list   { padding: 12px; gap: 10px; }
+  .table-row    { padding: 12px 14px; gap: 10px; }
+  .table-players { min-width: 0; }
+
+  /* Caixas de revelação / desempate / fim de jogo / regras: sheets que
+     sobem do fundo do ecrã, na zona do polegar, em vez de janelas
+     centradas a flutuar. */
+  .overlay, #rules-overlay { justify-content: flex-end; align-items: stretch; }
+  .reveal-box, .tiebreak-box, .gameover-box, .rules-box {
+    width: 100%; max-width: 100%;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    border-left: 0; border-right: 0; border-bottom: 0;
+    padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+    max-height: 88vh; max-height: 88dvh;
+    animation: slideUp .25s ease;
+  }
+  .rules-box { height: 88vh; height: 88dvh; }
+  .score-table th, .score-table td { padding: 7px 4px; }
+  .reveal-pname { min-width: 64px; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   TELEMÓVEL NA HORIZONTAL — 2 colunas
+   Com ~390px de altura, empilhar adversários / mesa / a minha área
+   deixava a mesa com 0px. Aqui a mesa e os adversários ficam à
+   esquerda e a minha área (Baelfungious, ações, mão) numa coluna à
+   direita, com a altura toda do ecrã.
+═══════════════════════════════════════════════════════ */
+@media (orientation: landscape) and (max-height: 500px) {
+  :root {
+    --card-w: 60px;  --card-h: 84px;
+    --my-baelf-w: 42px;
+  }
+  #screen-game.active {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 40%);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas: "header header" "opps my" "centre my";
+    padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
+  }
+  #game-header { grid-area: header; min-height: 0; padding: 4px 12px; padding-top: max(4px, env(safe-area-inset-top)); gap: 10px; }
+  .hdr-phase { font-size: .95rem; }
+  .hdr-info  { font-size: .8rem; }
+  #game-header .btn-ghost, #btn-leave { min-height: 36px; padding-top: 0; padding-bottom: 0; }
+
+  /* Adversários: grelha de colunas iguais, painel compacto */
+  #opponents-area {
+    grid-area: opps; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
+    gap: 6px; padding: 6px 8px; overflow: visible;
+  }
+  #opponents-area > .opponent-panel { margin: 0; }
+  .opponent-panel {
+    min-width: 0; padding: 4px 7px; gap: 1px 6px;
+    display: grid; grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: "name name" "meta action" "baelfs baelfs";
+  }
+  .opp-name   { grid-area: name; font-size: .8rem; }
+  .opp-meta   { grid-area: meta; font-size: .7rem; }
+  .opp-action { grid-area: action; font-size: .72rem; min-height: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
+  /* No resumo da vaza o resultado é a informação principal: linha própria */
+  .opp-action.recap { grid-column: 1 / -1; text-align: center; padding: 0 4px; margin: 1px 0 0; }
+  /* o vencedor vem com font-size inline maior (renderOpponents); aqui não cabe — cor e 🏆 chegam */
+  .opp-action { font-size: .8rem !important; }
+  .opp-baelfs { grid-area: baelfs; flex-wrap: nowrap; gap: 3px; margin-top: 2px; }
+  .mini-baelf { width: auto; flex: 1 1 0; min-width: 0; max-width: 64px; height: 18px; padding: 1px 3px; }
+  .mini-slot-dot { width: 5px; height: 5px; }
+  .mini-count { display: none; }
+
+  /* Mesa: as 4 Baelfungious numa só fila, com o tamanho a sair do
+     espaço que a célula da grelha tem de facto (container units). */
+  #centre-area {
+    grid-area: centre; container-type: size;
+    flex-wrap: nowrap; gap: 10px; padding: 6px 10px; overflow: hidden;
+  }
+  #centre-area .baelf-card {
+    --cw: min(calc((100cqw - 30px) / 4), calc((100cqh - 34px) * 9 / 15));
+    width: var(--cw); height: calc(var(--cw) * 15 / 9);
+  }
+  #centre-area .owner-label { max-width: calc((100cqw - 30px) / 4); font-size: .7rem; }
+  .seq-badge { top: 16px; right: 4px; min-width: 24px; height: 24px; font-size: .85rem; }
+
+  /* A minha área: coluna da direita, altura toda */
+  #my-area {
+    grid-area: my; max-height: none; min-height: 0;
+    border-top: 0; border-left: 1px solid var(--border);
+    gap: 5px; padding: 6px 10px; padding-bottom: max(6px, env(safe-area-inset-bottom));
+    justify-content: center;
+  }
+  #my-status { font-size: .78rem; }
+  #my-name-badge { font-size: .8rem; padding: 1px 8px; }
+  .my-baelf-tag { font-size: .58rem; }
+  #action-bar { gap: 6px; flex-wrap: nowrap; }
+  #action-bar .btn-action { padding: 0 8px; font-size: .82rem; flex: 1 1 auto; min-height: 40px; white-space: nowrap; }
+  #my-hand-row { padding-top: 10px; min-height: calc(var(--card-h) + 16px); gap: 5px; }
+  .hand-toggle { width: 44px; }
+  .charm-top { font-size: .95rem; }
+  .charm-mid { font-size: 1.4rem; }
+}
 </style>
 </head>
 <body>
@@ -866,7 +1032,7 @@ input  { font: inherit; }
     <span class="hdr-phase" id="hdr-phase">—</span>
     <span class="hdr-info"  id="hdr-round"></span>
     <span class="hdr-info"  id="hdr-deck" style="margin-left:8px"></span>
-    <button class="btn-ghost" id="btn-rules-game" style="padding:3px 8px;font-size:.72rem">📖 Regras</button>
+    <button class="btn-ghost" id="btn-rules-game">📖 Regras</button>
     <button id="btn-leave">Sair</button>
   </div>
   <div id="opponents-area"></div>
@@ -978,6 +1144,9 @@ let _recapKey   = '';
 let _recapLr    = null;
 let _mode       = '';     // ''|'bet'|'swap'
 let _selCards   = [];     // card ids selected
+let _handExpanded = false; // mão toda visível (vs só as jogáveis) — ver renderHand
+let _handKey      = '';    // vaza a que _handExpanded se refere
+let _handShown    = new Set(); // ids visíveis no último render (para animar só as que aparecem)
 let _selBaelf   = null;   // {baelfIdx?} or {playerIdx,slotIdx}
 let _seqOrder   = [];     // CHOOSE_SEQUENCE: [{playerIdx,slotIdx}] chosen so far, in click order
 let _tbCard         = null;  // tiebreak selected card id
@@ -1748,14 +1917,38 @@ function mkBtn(txt, cls, fn) {
 }
 
 // ── Hand ──────────────────────────────────────────────────────
+// Durante uma vaza (a decidir ou a apostar) a mão colapsa para mostrar só
+// as cartas que se podem apostar na Baelfungious em disputa; as outras
+// ficam atrás de um botão "+N" que expande a mão toda. Trocar e
+// descartar precisam da mão toda, por isso aí nunca colapsa. Volta a
+// colapsar a cada vaza nova.
 function renderHand(st) {
   const row = el('my-hand-row');
   row.innerHTML = '';
   if (!st.myHand) return;
   const t     = st.trick;
   const baelf = activeBaelf(st);
+  const discarding = t && t.waitingForDiscard === st.myIdx;
 
-  for (const c of st.myHand) {
+  const filterable = !!baelf && st.phase === 'PLAYER_ACTIONS' && !discarding &&
+                     (_mode === '' || _mode === 'bet');
+  const key = `${st.roundNum}-${st.trickNum}`;
+  if (_handKey !== key) { _handKey = key; _handExpanded = false; }
+
+  const playable  = filterable ? st.myHand.filter(c => cardCanPlay(c, baelf)) : st.myHand;
+  const hiddenN   = st.myHand.length - playable.length;
+  const collapsed = filterable && !_handExpanded && hiddenN > 0;
+  const shown     = collapsed ? playable : st.myHand;
+
+  const label = el('hand-label');
+  label.innerHTML = filterable
+    ? `Jogáveis nesta vaza: <b>${playable.length}</b> de ${st.myHand.length}`
+    : `Mão (${st.myHand.length})`;
+
+  const prevShown = _handShown;
+  _handShown = new Set(shown.map(c => c.id));
+
+  for (const c of shown) {
     const isSel  = _selCards.includes(c.id);
     let clickable = false, invalid = false;
 
@@ -1764,11 +1957,14 @@ function renderHand(st) {
       invalid   = !clickable;
     } else if (_mode === 'swap') {
       clickable = true;
-    } else if (t && t.waitingForDiscard === st.myIdx) {
+    } else if (discarding) {
       clickable = true;
     }
 
     const card = mkCharm(c, { clickable, selected: isSel, invalid });
+    // Mão expandida fora do modo aposta: esbater as que não servem nesta vaza
+    if (filterable && !invalid && !cardCanPlay(c, baelf)) card.classList.add('unplayable');
+    if (prevShown.size && !prevShown.has(c.id)) card.classList.add('hand-in');
     if (clickable) {
       card.onclick = () => {
         const idx = _selCards.indexOf(c.id);
@@ -1783,6 +1979,18 @@ function renderHand(st) {
       };
     }
     row.appendChild(card);
+  }
+
+  if (filterable && hiddenN > 0) {
+    const none = playable.length === 0;
+    const btn = ce('button', 'hand-toggle' + (none && collapsed ? ' wide' : ''));
+    btn.innerHTML = collapsed
+      ? (none ? `<small>Nenhuma carta jogável</small><b>Ver mão (${st.myHand.length})</b>`
+              : `<b>+${hiddenN}</b><small>outras</small>`)
+      : `<b>−</b><small>recolher</small>`;
+    btn.setAttribute('aria-expanded', String(!collapsed));
+    btn.onclick = () => { _handExpanded = !_handExpanded; playClick(); renderHand(st); };
+    row.appendChild(btn);
   }
 }
 
@@ -2629,7 +2837,7 @@ const TUT_STEPS = [
   { target: '.baelf-card.contested', title: '1ª vaza',
     body: st => { const b = activeBaelf(st); return `
       <p>Disputa-se agora a Baelfungious ${tutBaelfLabel(b)} — a que tem o brilho amarelo e a 👑.</p>
-      <p>Só podes apostar cartas <strong>${TUT_CNAME_PL[b.color]}</strong> (ou o Joker ${SYM_ICON[b.symbol]}). Quando escolheres apostar, as outras cartas ficam esbatidas.</p>`; } },
+      <p>Só podes apostar cartas <strong>${TUT_CNAME_PL[b.color]}</strong> (ou o Joker ${SYM_ICON[b.symbol]}). A tua mão mostra agora só as cartas que podes jogar aqui — toca em <strong>+N</strong> para ver as restantes.</p>`; } },
 
   { target: ['#action-bar', '#my-hand-row'], wait: 'myAction', title: 'É a tua vez!',
     body: st => `${tutOrder(st, st.governorIdx, st.trick?.currentActorIdx)}
@@ -2780,10 +2988,23 @@ function tutPlace() {
   spot.classList.add('show');
 
   box.classList.remove('center');
+  Object.assign(box.style, { left: '', width: '', transform: '' });
   const h = box.offsetHeight;
+  const sideL = r.left - gap * 2, sideR = vw - r.right - gap * 2;
   let top;
   if (vh - r.bottom >= h + gap * 2)  top = r.bottom + gap;       // cabe por baixo
   else if (r.top >= h + gap * 2)     top = r.top - h - gap;      // cabe por cima
+  else if (Math.max(sideL, sideR) >= 240) {
+    // Nem por cima nem por baixo (telemóvel deitado): ao lado do alvo,
+    // na coluna com mais largura, centrado na vertical com o alvo.
+    const w = Math.min(420, Math.max(sideL, sideR));
+    Object.assign(box.style, {
+      width: w + 'px', transform: 'none',
+      left: (sideR >= sideL ? r.right + gap : r.left - gap - w) + 'px',
+    });
+    const h2 = box.offsetHeight;
+    top = Math.min((r.top + r.bottom) / 2 - h2 / 2, vh - h2 - gap);
+  }
   else top = (r.top > vh - r.bottom) ? gap : vh - h - gap;       // encosta ao lado com mais espaço
   box.style.top = Math.max(gap, top) + 'px';
 }

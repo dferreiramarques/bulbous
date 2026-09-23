@@ -416,9 +416,9 @@ const MANIFEST = `{
 }`;
 
 // Service worker — caches only static assets (cards/icons), never the HTML
-// Cache name includes build timestamp so it busts automatically on each deploy
+// Mudar o nome da cache quando os assets mudam, para libertar os antigos
 const SW = `
-const CACHE = 'bulbous-assets-1771878784711';
+const CACHE = 'bulbous-assets-webp-1';
 
 self.addEventListener('install', e => { self.skipWaiting(); });
 

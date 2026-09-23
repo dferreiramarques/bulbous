@@ -13,7 +13,7 @@ bulbous/
 ├── .gitignore
 └── public/
     ├── cards/
-    │   └── (50 PNGs — ver IMAGES.md)
+    │   └── (50 WebP otimizados para o jogo — originais em art/cards-original/)
     ├── icon-192.png   ← ícone PWA 192×192px
     └── icon-512.png   ← ícone PWA 512×512px
 ```

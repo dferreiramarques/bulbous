@@ -238,11 +238,16 @@ input  { font: inherit; }
 @keyframes pulse { from { box-shadow: none; } to { box-shadow: 0 0 12px var(--accent); } }
 .opp-name    { font-size: .88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .opp-meta    { font-size: .78rem; color: var(--muted); }
-.opp-action  { font-size: .8rem; min-height: 1.1rem; font-weight: 600; }
-.opp-action.recap {
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
-  padding: 2px 6px; margin-top: 1px;
+.opp-action  {
+  font-size: .8rem; font-weight: 600;
+  /* Altura fixa (com borda transparente): passar de "aguarda" a "A
+     pensar…" ao resumo da vaza (moldura + letra maior no vencedor) não
+     pode mudar a altura do painel — senão a faixa de adversários cresce
+     e empurra a mesa. */
+  height: 22px; line-height: 20px; border: 1px solid transparent; border-radius: var(--radius-sm);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+.opp-action.recap { background: var(--surface); border-color: var(--border); padding: 0 6px; }
 .opp-baelfs  { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; align-items: flex-start; }
 
 /* Mini baelfungious — sized to show bulb distribution clearly */
@@ -392,14 +397,17 @@ input  { font: inherit; }
   border-radius: var(--radius-sm); border: 1px solid; white-space: nowrap;
 }
 #my-status     { font-size: .85rem; color: var(--muted); text-align: center; }
+#my-status { line-height: 20px; border: 1px solid transparent; border-radius: var(--radius-sm); }
 #my-status.recap {
-  background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
-  padding: 3px 10px; font-weight: 600; font-size: .9rem;
+  background: var(--surface2); border-color: var(--border);
+  padding: 0 10px; font-weight: 600; font-size: .9rem;
 }
 #my-baelfs-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; overflow-y: visible; }
 .my-baelf-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.my-baelf-tag  { font-size: .65rem; color: var(--muted); white-space: nowrap; }
-#action-bar    { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center; }
+.my-baelf-tag  { font-size: .65rem; color: var(--muted); white-space: nowrap; height: 12px; line-height: 12px; } /* sempre presente, mesmo vazia */
+/* Altura reservada mesmo sem botões (quando não é a minha vez): a barra
+   aparecer/desaparecer a cada turno fazia a mesa subir e descer. */
+#action-bar    { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center; min-height: 46px; }
 #hand-label    { font-size: .78rem; color: var(--muted); text-align: center; }
 #my-hand-row   {
   display: flex; gap: 7px; overflow-x: auto; padding-bottom: 4px;
@@ -772,9 +780,8 @@ html.edge #refill-banner { top: calc(env(safe-area-inset-top) + 50px); }
   }
   .opp-name   { grid-area: name; font-size: .78rem; }
   .opp-meta   { grid-area: meta; font-size: .72rem; }
-  .opp-action { grid-area: action; font-size: .72rem !important; min-height: 1.1em; line-height: 1.1;
-                white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .opp-action.recap { text-align: center; padding: 0 4px; margin: 0; }
+  .opp-action { grid-area: action; font-size: .72rem !important; height: 16px; line-height: 14px; }
+  .opp-action.recap { text-align: center; padding: 0 4px; }
   .opp-baelfs { grid-area: baelfs; flex-wrap: nowrap; gap: 3px; margin-top: 2px; }
   .mini-baelf { width: auto; flex: 1 1 0; min-width: 0; max-width: 64px; height: 18px; padding: 1px 3px; }
   .mini-slot-dot { width: 5px; height: 5px; }
@@ -795,15 +802,18 @@ html.edge #refill-banner { top: calc(env(safe-area-inset-top) + 50px); }
   #my-area { max-height: none; gap: 5px; padding: 6px 10px; padding-bottom: max(6px, env(safe-area-inset-bottom)); }
   #my-area > * { flex-shrink: 0; }
   #my-name-badge { display: none; }
-  #my-status { font-size: .8rem; line-height: 1.25; }
-  #my-status.recap { font-size: .85rem; padding: 2px 10px; }
+  /* Uma linha fixa: o estado muda a cada turno e não pode mexer na altura */
+  #my-info-row { height: 22px; flex-wrap: nowrap; }
+  #my-status { font-size: .8rem; line-height: 20px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #my-status.recap { font-size: .85rem; padding: 0 10px; }
   #hand-label { display: none; }
   #my-baelfs-row.mini { gap: 4px; }
   #my-baelfs-row.mini .mini-baelf { height: 20px; max-width: 72px; }
   .my-baelf-tag { font-size: .58rem; }
-  #action-bar { flex-wrap: nowrap; gap: 6px; }
+  #action-bar { flex-wrap: nowrap; gap: 6px; min-height: 42px; }
   #action-bar .btn-action { flex: 1 1 auto; min-width: 0; padding: 0 6px; min-height: 42px; font-size: .85rem; white-space: nowrap; }
-  #my-hand-row { padding-top: 10px; padding-bottom: 2px; min-height: calc(var(--card-h) + 14px); gap: 5px; }
+  /* altura fixa: mão vazia, colapsada, expandida (com scrollbar) ocupam o mesmo */
+  #my-hand-row { padding-top: 10px; padding-bottom: 2px; height: calc(var(--card-h) + 18px); min-height: 0; gap: 5px; }
   .hand-toggle { width: 44px; }
   .charm-top { font-size: .95rem; }
   .charm-mid { font-size: 1.4rem; }
@@ -1916,7 +1926,9 @@ function renderActionBar(st) {
       return;
     }
 
-    el('my-status').textContent = _seqOrder.length < total
+    el('my-status').textContent = isCompact()
+      ? (_seqOrder.length < total ? `👑 Toca nas ${total} pela ordem de disputa (${_seqOrder.length}/${total})` : '👑 Ordem completa — confirma')
+      : _seqOrder.length < total
       ? `👑 És o Governante — clica as ${total} Baelfungious no centro, pela ordem em que serão disputadas (${_seqOrder.length}/${total})`
       : '👑 Ordem completa — confirma ou clica outra vez numa carta para corrigir';
 
